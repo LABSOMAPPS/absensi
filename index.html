@@ -47,7 +47,7 @@
   <!-- KONFIGURASI: ISI DENGAN URL WEB APP APPS SCRIPT ANDA (akhiran /exec) -->
   <!-- ================================================================== -->
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycby5FQUGraQkBR9DnHLX8mEStYrMlTueaVtGzDEBG6TCsXAap2tTVDizDBpPlBmsXvGs/exec';
+    const API_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT_ANDA/exec';
   </script>
 
   <!-- Jembatan google.script.run -> fetch() ke Apps Script (doPost) -->
@@ -2906,7 +2906,8 @@
     }
     function fmtJamSingkat(sec) {
       if (!sec) return '-';
-      const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
+      const tot = Math.round(sec / 60);                 // bulatkan ke menit dulu agar tidak muncul "60m"
+      const h = Math.floor(tot / 60), m = tot % 60;
       return h > 0 ? `${h}j ${String(m).padStart(2, '0')}m` : `${m}m`;
     }
     function detikDariTeks(t) {
@@ -3193,34 +3194,101 @@
       if (kalSelectedDay !== null) document.getElementById('kalenderDetail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
+    // Label & warna untuk tiap sesi (baris log) di rincian tanggal
+    function infoSesi(x) {
+      const keluarKosong = !x.keluar || x.keluar === '-';
+      if (x.status === 'KOREKSI') return ['Koreksi admin', 'bg-violet-100 text-violet-700'];
+      if (keluarKosong && (!x.masuk || x.masuk === '-')) return ['Input durasi', 'bg-slate-100 text-slate-600'];
+      if (keluarKosong) return ['Belum keluar', 'bg-amber-100 text-amber-800'];
+      return ['Selesai', 'bg-emerald-100 text-emerald-800'];
+    }
+    const jamAtauStrip = (t) => (t && t !== '-') ? t : '—';
+
     function renderDetailHari(i, v) {
       const cd = cacheKalender.calendarDays[i];
       const key = cd.namaHari.toLowerCase();
       const baris = v.list.map(p => {
         const sec = p.harianDetik[i] || 0;
         const sg = p.sanggup[key];
-        let st = sec > 0 ? 'Hadir' : (cd.isJumat ? 'Libur' : (sg && !sg.aktif ? 'Izin' : (cd.isMendatang ? '-' : 'Tidak hadir')));
-        return { p, sec, st, target: (!cd.isJumat && sg && sg.aktif) ? sg.detik : 0 };
+        const sesi = (p.sesiHarian && p.sesiHarian[i]) || [];
+        let st = sec > 0 ? 'Hadir' : (sesi.length ? 'Belum keluar' : (cd.isJumat ? 'Libur' : (sg && !sg.aktif ? 'Izin' : (cd.isMendatang ? '-' : 'Tidak hadir'))));
+        const masukList = sesi.map(x => x.masuk).filter(t => t && t !== '-').sort();
+        const keluarList = sesi.map(x => x.keluar).filter(t => t && t !== '-').sort();
+        return { p, sec, st, sesi, target: (!cd.isJumat && sg && sg.aktif) ? sg.detik : 0,
+          masukAwal: masukList[0] || '', keluarAkhir: keluarList[keluarList.length - 1] || '' };
       }).sort((a, b) => b.sec - a.sec);
       const totalHari = baris.reduce((a, b) => a + b.sec, 0);
-      const warnaSt = { 'Hadir': 'bg-emerald-100 text-emerald-800', 'Izin': 'bg-sky-100 text-sky-800', 'Libur': 'bg-amber-100 text-amber-800', 'Tidak hadir': 'bg-rose-100 text-rose-700', '-': 'bg-slate-100 text-slate-500' };
+      const warnaSt = { 'Belum keluar': 'bg-amber-100 text-amber-800', 'Hadir': 'bg-emerald-100 text-emerald-800', 'Izin': 'bg-sky-100 text-sky-800', 'Libur': 'bg-amber-100 text-amber-800', 'Tidak hadir': 'bg-rose-100 text-rose-700', '-': 'bg-slate-100 text-slate-500' };
       const el = document.getElementById('kalenderDetail');
       el.classList.remove('hidden');
-      el.innerHTML = `
+
+      const kepala = `
         <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-1">
           <div class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-calendar-day text-emerald-600 mr-1"></i>
             ${esc(cd.namaHari)}, ${cd.day} ${esc(cacheKalender.namaBulan)} ${esc(cacheKalender.tahun)} H
             <span class="text-xs text-slate-400 font-medium ml-1">(${esc(cd.masehi || '')})</span></div>
-          <div class="text-xs font-bold text-emerald-800">Total: <span class="font-mono">${fmtDetik(totalHari)}</span> • ${baris.filter(b => b.sec > 0).length} hadir</div>
-        </div>
-        <div class="max-h-80 overflow-y-auto custom-scroll">
+          <div class="text-xs font-bold text-emerald-800">Total: <span class="font-mono">${fmtDetik(totalHari)}</span>${v.single ? '' : ` • ${baris.filter(b => b.sec > 0).length} hadir`}</div>
+        </div>`;
+
+      // ===== SATU PESERTA: durasi & kesanggupan di baris tanggal, lalu rincian jam masuk/keluar =====
+      if (v.single) {
+        const b = baris[0];
+        const pct = b.target > 0 ? Math.min(b.sec / b.target * 100, 100) : 0;
+        const warnaBar = pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-400' : 'bg-rose-400';
+        const kepalaSingle = `
+          <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-col lg:flex-row justify-between lg:items-center gap-2">
+            <div class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-calendar-day text-emerald-600 mr-1"></i>
+              ${esc(cd.namaHari)}, ${cd.day} ${esc(cacheKalender.namaBulan)} ${esc(cacheKalender.tahun)} H
+              <span class="text-xs text-slate-400 font-medium ml-1">(${esc(cd.masehi || '')})</span></div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              <span class="text-slate-500 font-semibold"><i class="fa-solid fa-hourglass-half text-emerald-600 mr-1"></i>Durasi:
+                <b class="font-mono text-emerald-800">${b.sec > 0 ? fmtDetik(b.sec) : '—'}</b></span>
+              <span class="text-slate-500 font-semibold"><i class="fa-solid fa-bullseye text-amber-500 mr-1"></i>Kesanggupan:
+                <b class="font-mono text-amber-800">${b.target ? fmtDetik(b.target) : '—'}</b></span>
+              ${b.target ? `<span class="inline-flex items-center gap-1.5"><span class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden"><span class="block h-full ${warnaBar}" style="width:${pct}%"></span></span><b class="text-slate-600">${Math.round(b.sec / b.target * 100)}%</b></span>` : ''}
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${warnaSt[b.st]}">${b.st}</span>
+            </div>
+          </div>`;
+        let daftar;
+        if (b.sesi.length) {
+          daftar = `
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs"><thead class="bg-white text-slate-500 border-b border-slate-100"><tr>
+                <th class="py-2 px-3 text-center w-12">Sesi</th>
+                <th class="py-2 px-3 text-center">Jam Masuk</th><th class="py-2 px-3 text-center">Jam Keluar</th>
+                <th class="py-2 px-3 text-center">Durasi</th><th class="py-2 px-3 text-center">Keterangan</th>
+              </tr></thead><tbody class="divide-y divide-slate-100">
+              ${b.sesi.map((x, k) => { const inf = infoSesi(x); return `<tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-3 text-center font-bold text-slate-400">${k + 1}</td>
+                <td class="py-2.5 px-3 text-center font-mono font-bold text-emerald-800">${x.masuk && x.masuk !== '-' ? '<i class="fa-solid fa-right-to-bracket text-[10px] text-emerald-500 mr-1"></i>' : ''}${jamAtauStrip(x.masuk)}</td>
+                <td class="py-2.5 px-3 text-center font-mono font-bold text-blue-800">${x.keluar && x.keluar !== '-' ? '<i class="fa-solid fa-right-from-bracket text-[10px] text-blue-500 mr-1"></i>' : ''}${jamAtauStrip(x.keluar)}</td>
+                <td class="py-2.5 px-3 text-center font-mono font-black text-slate-800">${esc(x.durasi)}</td>
+                <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${inf[1]}">${inf[0]}</span></td>
+              </tr>`; }).join('')}
+              </tbody></table>
+            </div>`;
+        } else if (b.sec > 0) {
+          daftar = `<div class="px-4 py-3 text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i> Durasi berasal dari data koreksi lama, jam masuk/keluar tidak tercatat.</div>`;
+        } else {
+          daftar = `<div class="px-4 py-3 text-xs text-slate-400">Tidak ada catatan presensi pada tanggal ini.</div>`;
+        }
+        el.innerHTML = kepalaSingle + daftar;
+        return;
+      }
+
+      // ===== BANYAK PESERTA: tabel dengan jam masuk pertama & keluar terakhir =====
+      el.innerHTML = kepala + `
+        <div class="max-h-96 overflow-auto custom-scroll">
           <table class="w-full text-xs"><thead class="bg-white text-slate-500 sticky top-0"><tr>
             <th class="py-2 px-3 text-left">Nama</th><th class="py-2 px-3 text-left">Jabatan</th>
+            <th class="py-2 px-3 text-center">Masuk</th><th class="py-2 px-3 text-center">Keluar</th>
             <th class="py-2 px-3 text-center">Durasi</th><th class="py-2 px-3 text-center">Kesanggupan</th><th class="py-2 px-3 text-center">Status</th>
           </tr></thead><tbody class="divide-y divide-slate-100">
           ${baris.map(b => `<tr class="hover:bg-slate-50">
             <td class="py-2 px-3 font-bold text-slate-800">${esc(b.p.nama)}${b.p.isPimpinan ? ' <span class="text-[9px] text-emerald-700 font-black">PIMPINAN</span>' : ''}</td>
             <td class="py-2 px-3 text-slate-500">${esc(b.p.jabatan || '-')}</td>
+            <td class="py-2 px-3 text-center font-mono font-semibold text-emerald-800">${jamAtauStrip(b.masukAwal)}</td>
+            <td class="py-2 px-3 text-center font-mono font-semibold text-blue-800">${jamAtauStrip(b.keluarAkhir)}${b.sesi.length > 1 ? `<div class="text-[9px] text-slate-400 font-sans font-bold">${b.sesi.length} sesi</div>` : ''}</td>
             <td class="py-2 px-3 text-center font-mono font-bold ${b.sec > 0 ? 'text-emerald-700' : 'text-slate-300'}">${b.sec > 0 ? fmtDetik(b.sec) : '-'}</td>
             <td class="py-2 px-3 text-center font-mono text-slate-500">${b.target ? fmtDetik(b.target) : '-'}</td>
             <td class="py-2 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${warnaSt[b.st]}">${b.st}</span></td>
