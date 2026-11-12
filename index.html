@@ -47,7 +47,7 @@
   <!-- KONFIGURASI: ISI DENGAN URL WEB APP APPS SCRIPT ANDA (akhiran /exec) -->
   <!-- ================================================================== -->
   <script>
-    const API_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT_ANDA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycby5FQUGraQkBR9DnHLX8mEStYrMlTueaVtGzDEBG6TCsXAap2tTVDizDBpPlBmsXvGs/exec';
   </script>
 
   <!-- Jembatan google.script.run -> fetch() ke Apps Script (doPost) -->
@@ -3311,7 +3311,19 @@
       document.getElementById('loginChecking').classList.add('hidden');
       const err = document.getElementById('loginError');
       if (pesan) { err.textContent = pesan; err.classList.remove('hidden'); } else err.classList.add('hidden');
-      google.script.run.withSuccessHandler(st => aturModeSetup(st && st.perluSetup)).withFailureHandler(() => {}).cekStatusSetup();
+      google.script.run
+        .withSuccessHandler(st => {
+          aturModeSetup(st && st.perluSetup);
+          setTimeout(() => document.getElementById(modeSetup ? 'setupNama' : 'loginUsername').focus(), 50);
+        })
+        .withFailureHandler(er => {
+          // Tampilkan penyebab gagal terhubung ke server (dulu diam saja)
+          err.innerHTML = '<i class="fa-solid fa-plug-circle-xmark mr-1"></i> <b>Server belum terhubung.</b><br>' +
+            esc((er && er.message) || String(er)) +
+            '<br><span class="font-normal">API_URL: <code class="break-all">' + esc(typeof API_URL !== 'undefined' ? API_URL : '-') + '</code></span>';
+          err.classList.remove('hidden');
+        })
+        .cekStatusSetup();
       setTimeout(() => document.getElementById(modeSetup ? 'setupNama' : 'loginUsername').focus(), 100);
     }
 
