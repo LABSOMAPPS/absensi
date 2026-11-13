@@ -5,13 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Absensi & Database Labsoma - Pondok Pesantren Sidogiri</title>
   <meta name="description" content="Sistem Absensi & Database Labsoma Pondok Pesantren Sidogiri">
-  <meta name="theme-color" content="#064e3b">
+  <meta name="theme-color" content="#0b2738">
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23059669'/><text x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23157f8f'/><text x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
+  <script>
+    /* Tema awal: ikut Labsoma (dalam bingkai) -> pilihan tersimpan -> pengaturan perangkat */
+    (function () {
+      var t = null;
+      try { if (window.parent !== window && window.parent.document.body.dataset.theme) t = window.parent.document.body.dataset.theme; } catch (e) {}
+      if (!t) { try { t = localStorage.getItem('labsoma-theme'); } catch (e) {} }
+      if (!t) t = (window.parent !== window) ? 'dark' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-tema', t === 'light' ? 'terang' : 'gelap');
+    })();
+  </script>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <!-- Tailwind CSS, FontAwesome, & SheetJS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,23 +31,25 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'Consolas', 'monospace'],
           },
           colors: {
+            // Palet navy Labsoma (kepala modal, layar login)
             sidogiri: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              200: '#a7f3d0',
-              300: '#6ee7b7',
-              400: '#34d399',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-              800: '#065f46',
-              900: '#064e3b',
-              950: '#022c22',
+              50: '#eef6f9', 100: '#d5e8ef', 200: '#abd0de', 300: '#7aafc4', 400: '#4b8aa5',
+              500: '#2f6d89', 600: '#225770', 700: '#1a465c', 800: '#12364a', 900: '#0b2738', 950: '#061823',
+            },
+            // Aksen teal Labsoma (menggantikan hijau emerald di seluruh aplikasi)
+            emerald: {
+              50: '#ecfafc', 100: '#d2f2f6', 200: '#a8e5ed', 300: '#6dd0dc', 400: '#34b3c3',
+              500: '#1b93a3', 600: '#157f8f', 700: '#136877', 800: '#145665', 900: '#134755', 950: '#082f39',
             }
-          }
+          },
+          // Warna garis bawaan mengikuti tema (terang/gelap)
+          borderColor: { DEFAULT: 'var(--garis-dasar)' },
+          divideColor: { DEFAULT: 'var(--garis-dasar)' },
+          ringOffsetColor: { DEFAULT: 'var(--panel)' }
         }
       }
     }
@@ -107,9 +119,9 @@
   </script>
   <style>
     body {
-      background-color: #f8fafc;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      letter-spacing: -0.01em;
+      background-color: #f4f8fa;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      letter-spacing: -0.005em;
     }
     .custom-scroll::-webkit-scrollbar {
       height: 7px;
@@ -122,25 +134,85 @@
     .custom-scroll::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    /* ===== TEMA: putih bersih, kartu lembut, aksen hijau ===== */
+    .shadow-card { box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px -6px rgba(16, 24, 40, .08); }
+    .tab-btn { position: relative; }
     .tab-active {
-      background-color: #10b981;
-      color: #ffffff !important;
+      background-color: #ecfdf5;
+      color: #047857 !important;
       font-weight: 700;
-      box-shadow: 0 4px 14px -2px rgba(16, 185, 129, 0.45);
     }
+    .tab-active::before {
+      content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 4px;
+      border-radius: 0 4px 4px 0; background: #10b981;
+    }
+    .tab-active i { color: #059669; }
+
+    /* Judul kartu: ikon dalam kotak lembut seperti dashboard modern */
+    .tab-content h2 > i.fa-solid:first-child, .tab-content h2 > i.fa-regular:first-child {
+      width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 9px; background: #ecfdf5; color: #059669 !important; font-size: 14px; flex-shrink: 0;
+    }
+    .tab-content h2 { font-size: 15px; letter-spacing: -0.01em; }
+
+    /* Header tabel: huruf kecil kapital abu-abu */
+    .tab-content table:not(.no-upper) thead th {
+      font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; font-weight: 700;
+    }
+
+    /* Kartu statistik bergradasi */
+    .kpi {
+      position: relative; overflow: hidden; border-radius: 14px; color: #fff; padding: 18px 20px;
+      min-height: 112px; display: flex; flex-direction: column; justify-content: center;
+      box-shadow: 0 10px 24px -12px var(--kpi-shadow, rgba(16, 185, 129, .6));
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .kpi:hover { transform: translateY(-2px); }
+    .kpi-green  { background: linear-gradient(135deg, #34d399 0%, #16a34a 100%); --kpi-shadow: rgba(22, 163, 74, .55); }
+    .kpi-teal   { background: linear-gradient(135deg, #2dd4bf 0%, #0891b2 100%); --kpi-shadow: rgba(8, 145, 178, .55); }
+    .kpi-blue   { background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%); --kpi-shadow: rgba(37, 99, 235, .55); }
+    .kpi-orange { background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%); --kpi-shadow: rgba(249, 115, 22, .55); }
+    .kpi-purple { background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); --kpi-shadow: rgba(124, 58, 237, .5); }
+    .kpi-val   { font-size: 26px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; position: relative; z-index: 1; }
+    .kpi-label { font-size: 13px; font-weight: 700; margin-top: 6px; position: relative; z-index: 1; }
+    .kpi-sub   { font-size: 10.5px; opacity: .85; margin-top: 2px; position: relative; z-index: 1; }
+    .kpi-ico {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      width: 76px; height: 76px; border-radius: 9999px; background: rgba(255, 255, 255, .14);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .kpi-ico > span {
+      width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, .22);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .kpi-bar { height: 6px; background: rgba(255, 255, 255, .3); border-radius: 9999px; overflow: hidden; margin-top: 8px; max-width: 70%; position: relative; z-index: 1; }
+    .kpi-bar > div { height: 100%; background: #fff; border-radius: 9999px; }
+    @media (max-width: 639.98px) {
+      .kpi { padding: 14px 14px; min-height: 96px; }
+      .kpi-val { font-size: 20px; }
+      .kpi-label { font-size: 11.5px; }
+      .kpi-ico { width: 64px; height: 64px; right: -14px; top: -14px; transform: none; opacity: .55; }
+      .kpi-ico > span { display: none; }
+    }
+
+    /* Menu pengguna di top bar */
+    #userMenu { transform-origin: top right; }
 
     /* ===== SIDEBAR ===== */
     #sidebar { width: 16rem; transition: width .25s ease, transform .25s ease; }
     #mainWrap { transition: padding-left .25s ease; }
     @media (min-width: 1024px) {
       #mainWrap { padding-left: 16rem; }
-      body.sb-mini #sidebar { width: 4.75rem; }
-      body.sb-mini #mainWrap { padding-left: 4.75rem; }
+      body.sb-mini #sidebar { width: 4.25rem; }
+      body.sb-mini #mainWrap { padding-left: 4.25rem; }
+      body.sb-mini #sidebar .tab-active::before { left: -8px; }
+      body.sb-mini #sidebar nav { padding-left: .5rem; padding-right: .5rem; }
+      body.sb-mini #sidebar .sb-brand { justify-content: center; padding-left: 0; padding-right: 0; }
       body.sb-mini #sidebar .sb-label { display: none; }
       body.sb-mini #sidebar .sb-divider { display: block; }
       body.sb-mini #sidebar .tab-btn { justify-content: center; padding-left: 0; padding-right: 0; }
       body.sb-mini #sbCollapseIcon { transform: rotate(180deg); }
-      body.sb-mini #sidebar .flex.gap-1\.5.mb-2 { flex-direction: column; }
+
     }
     @media (max-width: 1023.98px) {
       #sidebar { transform: translateX(-100%); width: 17rem; max-width: 85vw; }
@@ -183,6 +255,280 @@
     .btn-bpsti-hapus:hover {
       background-color: #c82333;
     }
+
+    /* =====================================================================
+       TEMA LABSOMA (navy-teal, senada aplikasi Labsoma PPS) + TEMA GELAP
+       Terang/gelap mengikuti pilihan tema Labsoma (localStorage 'labsoma-theme').
+       ===================================================================== */
+    :root {
+      color-scheme: light;
+      --latar: #f4f8fa; --panel: #ffffff; --panel2: #f1f8fa; --panel3: #e0f0f5;
+      --teks: #102a43; --teks2: #334e68; --muted: #5c7080;
+      --garis: rgba(13,122,138,.12); --garis2: rgba(13,122,138,.22);
+      --aksen: #157f8f; --aksen-kuat: #136877; --aksen-soft: rgba(21,127,143,.10);
+      --emas: #c99a2e;
+      --bayang: 0 1px 2px rgba(16,42,67,.05), 0 10px 28px -14px rgba(16,42,67,.18);
+      --input: #ffffff;
+      --sb-1: #0d2c3f; --sb-2: #081c29;
+      --garis-dasar: #e2e8f0;
+    }
+    html[data-tema="gelap"] {
+      color-scheme: dark;
+      --latar: #071925; --panel: #0f2b3c; --panel2: #15384d; --panel3: #1c4760;
+      --teks: #f0f9ff; --teks2: #cfe3ee; --muted: #9dbccd;
+      --garis: rgba(255,255,255,.09); --garis2: rgba(255,255,255,.16);
+      --aksen: #32b8c4; --aksen-kuat: #4cc9d4; --aksen-soft: rgba(50,184,196,.15);
+      --emas: #facc15;
+      --bayang: 0 1px 2px rgba(0,0,0,.25), 0 14px 32px -16px rgba(0,0,0,.6);
+      --input: #0a202e;
+      --sb-1: #0b2535; --sb-2: #05131c;
+      --garis-dasar: rgba(255,255,255,.10);
+    }
+    html, body { background-color: var(--latar) !important; }
+    body { color: var(--teks); transition: background-color .2s ease; }
+    ::selection { background: var(--aksen); color: #fff; }
+
+    /* Kartu & bayangan */
+    .shadow-card { box-shadow: var(--bayang) !important; }
+    .rounded-2xl.shadow-card { border-color: var(--garis) !important; }
+
+    /* Scrollbar */
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(92,112,128,.35); }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(92,112,128,.6); }
+    html[data-tema="gelap"] .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); }
+    html[data-tema="gelap"] .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.28); }
+
+    /* ---------- SIDEBAR: navy elegan (terang & gelap) ---------- */
+    #sidebar {
+      background: linear-gradient(180deg, var(--sb-1) 0%, var(--sb-2) 100%) !important;
+      border-right: 1px solid rgba(255,255,255,.06) !important;
+      color: #cfe3ee !important;
+      box-shadow: 4px 0 24px -12px rgba(2,12,20,.55) !important;
+    }
+    #sidebar .sb-brand { border-color: rgba(255,255,255,.07) !important; }
+    #sidebar .sb-brand .text-slate-800 { color: #ffffff !important; }
+    #sidebar .sb-brand .text-slate-400 { color: #8fb0c2 !important; }
+    #sidebar .sb-brand .text-emerald-600 { color: var(--emas) !important; }
+    #sidebar .sb-brand .text-slate-500 { color: #cfe3ee !important; }
+    #sidebar .sb-brand button:hover { background: rgba(255,255,255,.08) !important; }
+    #sidebar [data-grp-label].sb-label { color: #6f93a7 !important; letter-spacing: .14em; }
+    #sidebar .sb-divider { border-color: rgba(255,255,255,.08) !important; }
+    #sidebar .tab-btn { color: #a9c4d3 !important; background: transparent !important; }
+    #sidebar .tab-btn:hover { color: #ffffff !important; background: rgba(255,255,255,.06) !important; }
+    #sidebar .tab-btn.tab-active {
+      color: #ffffff !important;
+      background: linear-gradient(90deg, rgba(50,184,196,.26), rgba(50,184,196,.08)) !important;
+      box-shadow: inset 0 0 0 1px rgba(50,184,196,.28);
+    }
+    #sidebar .tab-btn.tab-active i { color: #6fe0ea !important; }
+    #sidebar .tab-active::before { background: #32b8c4; box-shadow: 0 0 12px rgba(50,184,196,.7); }
+    #sidebar .shrink-0.border-t { border-color: rgba(255,255,255,.07) !important; }
+    #sidebar .shrink-0.border-t button { color: #8fb0c2 !important; }
+    #sidebar .shrink-0.border-t button:hover { color: #fff !important; background: rgba(255,255,255,.06) !important; }
+    #sidebar button.text-rose-600 { color: #fecdd3 !important; background: rgba(248,113,113,.14) !important; }
+
+    /* Menu aktif (dipakai juga di luar sidebar) */
+    .tab-active { background-color: var(--aksen-soft); color: var(--aksen) !important; font-weight: 700; }
+    .tab-active::before { background: var(--aksen); }
+    .tab-active i { color: var(--aksen); }
+
+    /* ---------- TOP BAR ---------- */
+    #mainWrap > header {
+      background: color-mix(in srgb, var(--panel) 86%, transparent) !important;
+      backdrop-filter: saturate(160%) blur(10px); -webkit-backdrop-filter: saturate(160%) blur(10px);
+      border-color: var(--garis) !important;
+    }
+    #btnTema { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+      color: var(--muted); border: 1px solid var(--garis); background: var(--panel); transition: all .15s ease; flex-shrink: 0; }
+    #btnTema:hover { color: var(--aksen); border-color: var(--garis2); background: var(--aksen-soft); }
+
+    /* Judul halaman */
+    #pageTitle { color: var(--teks) !important; }
+    #pageTitleIcon { color: var(--aksen) !important; }
+
+    /* Judul kartu: ikon dalam kotak lembut */
+    .tab-content h2 > i.fa-solid:first-child, .tab-content h2 > i.fa-regular:first-child {
+      background: var(--aksen-soft) !important; color: var(--aksen) !important;
+      box-shadow: inset 0 0 0 1px var(--garis);
+    }
+    .tab-content table:not(.no-upper) thead th { color: var(--muted) !important; }
+
+    /* Tombol hijau lama -> teal Labsoma */
+    .btn-bpsti-filter, .btn-bpsti-ubah { background-color: var(--aksen) !important; color: #fff !important; }
+    .btn-bpsti-filter:hover, .btn-bpsti-ubah:hover { background-color: var(--aksen-kuat) !important; }
+    html[data-tema="gelap"] .btn-bpsti-filter, html[data-tema="gelap"] .btn-bpsti-ubah { color: #04242c !important; }
+    .btn-bpsti-hapus { background-color: #e11d48 !important; }
+    .btn-bpsti-hapus:hover { background-color: #be123c !important; }
+
+    /* ---------- KARTU STATISTIK: putih/navy bersih dengan aksen warna ---------- */
+    .kpi {
+      background: var(--panel) !important; color: var(--teks) !important;
+      border: 1px solid var(--garis); box-shadow: var(--bayang) !important;
+      padding: 18px 76px 18px 20px; min-height: 108px;
+    }
+    .kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--kpi-c); }
+    .kpi:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(16,42,67,.06), 0 18px 34px -16px var(--kpi-glow) !important; }
+    .kpi-val { color: var(--teks); }
+    .kpi-label { color: var(--teks2); font-weight: 700; }
+    .kpi-sub { color: var(--muted); opacity: 1; }
+    .kpi-sub b { color: var(--kpi-c); }
+    .kpi-ico { right: 16px; top: 18px; transform: none; width: 46px; height: 46px; border-radius: 14px;
+      background: var(--kpi-soft); color: var(--kpi-c); }
+    .kpi-ico > span { background: transparent; width: auto; height: auto; font-size: 18px; }
+    .kpi-bar { background: var(--panel3); max-width: 100%; }
+    .kpi-bar > div { background: var(--kpi-c); }
+    .kpi-green  { --kpi-c: #157f8f; --kpi-soft: rgba(21,127,143,.11);  --kpi-glow: rgba(21,127,143,.35); }
+    .kpi-teal   { --kpi-c: #0e7490; --kpi-soft: rgba(14,116,144,.11);  --kpi-glow: rgba(14,116,144,.35); }
+    .kpi-blue   { --kpi-c: #2563eb; --kpi-soft: rgba(37,99,235,.10);   --kpi-glow: rgba(37,99,235,.30); }
+    .kpi-orange { --kpi-c: #c27803; --kpi-soft: rgba(217,119,6,.12);   --kpi-glow: rgba(217,119,6,.30); }
+    .kpi-purple { --kpi-c: #7c3aed; --kpi-soft: rgba(124,58,237,.10);  --kpi-glow: rgba(124,58,237,.30); }
+    html[data-tema="gelap"] .kpi-green  { --kpi-c: #32b8c4; --kpi-soft: rgba(50,184,196,.16); --kpi-glow: rgba(50,184,196,.35); }
+    html[data-tema="gelap"] .kpi-teal   { --kpi-c: #22d3ee; --kpi-soft: rgba(34,211,238,.14); --kpi-glow: rgba(34,211,238,.30); }
+    html[data-tema="gelap"] .kpi-blue   { --kpi-c: #60a5fa; --kpi-soft: rgba(96,165,250,.15); --kpi-glow: rgba(96,165,250,.30); }
+    html[data-tema="gelap"] .kpi-orange { --kpi-c: #fbbf24; --kpi-soft: rgba(251,191,36,.14); --kpi-glow: rgba(251,191,36,.28); }
+    html[data-tema="gelap"] .kpi-purple { --kpi-c: #a78bfa; --kpi-soft: rgba(167,139,250,.15); --kpi-glow: rgba(167,139,250,.28); }
+    @media (max-width: 639.98px) {
+      .kpi { padding: 14px 54px 14px 16px; min-height: 92px; }
+      .kpi-ico { width: 36px; height: 36px; right: 12px; top: 12px; opacity: 1; border-radius: 11px; }
+      .kpi-ico > span { display: flex; font-size: 14px; }
+    }
+
+    /* ---------- Formulir ---------- */
+    input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea { transition: border-color .15s, box-shadow .15s; }
+    input:not([type=checkbox]):not([type=radio]):not([type=file]):focus, select:focus, textarea:focus {
+      border-color: var(--aksen) !important; box-shadow: 0 0 0 3px var(--aksen-soft);
+    }
+    html[data-tema="gelap"] input:not([type=checkbox]):not([type=radio]):not([type=file]),
+    html[data-tema="gelap"] select, html[data-tema="gelap"] textarea {
+      background-color: var(--input) !important; color: var(--teks) !important; border-color: rgba(255,255,255,.16) !important;
+    }
+    html[data-tema="gelap"] input::placeholder, html[data-tema="gelap"] textarea::placeholder { color: #7f9fb2 !important; opacity: 1; }
+    html[data-tema="gelap"] option { background: #0f2b3c; color: #f0f9ff; }
+    html[data-tema="gelap"] code { color: #dcebf3; }
+
+    /* ---------- Modal & layar login ---------- */
+    .modal-box { border-color: var(--garis) !important; }
+    html[data-tema="gelap"] .modal-wrap { background-color: rgba(2,10,16,.72) !important; }
+    html[data-tema="gelap"] #loginScreen .rounded-3xl { box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08) !important; }
+
+    /* Toast lebih halus */
+    #toastContainer > div { border-radius: 14px; box-shadow: 0 16px 34px -12px rgba(2,12,20,.45); }
+
+    /* ---------- TEMA GELAP: pemetaan kelas utilitas ---------- */
+html[data-tema="gelap"] [class~="bg-white"] { background-color:var(--panel)!important }
+html[data-tema="gelap"] [class~="bg-slate-50"],
+html[data-tema="gelap"] [class~="bg-slate-50/80"] { background-color:#12314a!important }
+html[data-tema="gelap"] [class~="bg-slate-100"],
+html[data-tema="gelap"] [class~="bg-slate-100/80"] { background-color:#163a52!important }
+html[data-tema="gelap"] [class~="bg-slate-200"] { background-color:#1c4660!important }
+html[data-tema="gelap"] [class~="bg-slate-300"] { background-color:#2b5a76!important }
+html[data-tema="gelap"] [class~="bg-slate-700"],
+html[data-tema="gelap"] [class~="bg-slate-800"] { background-color:#2a5f7c!important }
+html[data-tema="gelap"] [class~="bg-emerald-50"],
+html[data-tema="gelap"] [class~="bg-emerald-50/20"],
+html[data-tema="gelap"] [class~="bg-emerald-50/40"],
+html[data-tema="gelap"] [class~="bg-emerald-50/50"],
+html[data-tema="gelap"] [class~="bg-emerald-50/80"] { background-color:rgba(50,184,196,.10)!important }
+html[data-tema="gelap"] [class~="bg-emerald-100"] { background-color:rgba(50,184,196,.18)!important }
+html[data-tema="gelap"] [class~="bg-emerald-200"],
+html[data-tema="gelap"] [class~="bg-emerald-300"] { background-color:rgba(50,184,196,.32)!important }
+html[data-tema="gelap"] [class~="bg-emerald-500"] { background-color:#17707d!important }
+html[data-tema="gelap"] [class~="bg-emerald-600"] { background-color:#1f95a4!important }
+html[data-tema="gelap"] [class~="bg-amber-50"],
+html[data-tema="gelap"] [class~="bg-amber-50/40"],
+html[data-tema="gelap"] [class~="bg-amber-50/50"] { background-color:rgba(250,204,21,.08)!important }
+html[data-tema="gelap"] [class~="bg-amber-100"],
+html[data-tema="gelap"] [class~="bg-amber-100/70"] { background-color:rgba(250,204,21,.16)!important }
+html[data-tema="gelap"] [class~="bg-blue-50/40"],
+html[data-tema="gelap"] [class~="bg-blue-50/50"],
+html[data-tema="gelap"] [class~="bg-blue-50/80"],
+html[data-tema="gelap"] [class~="bg-sky-50"] { background-color:rgba(56,189,248,.09)!important }
+html[data-tema="gelap"] [class~="bg-blue-100"],
+html[data-tema="gelap"] [class~="bg-sky-100"] { background-color:rgba(56,189,248,.17)!important }
+html[data-tema="gelap"] [class~="bg-blue-200"] { background-color:rgba(56,189,248,.26)!important }
+html[data-tema="gelap"] [class~="bg-rose-50"],
+html[data-tema="gelap"] [class~="bg-red-50"] { background-color:rgba(248,113,113,.11)!important }
+html[data-tema="gelap"] [class~="bg-rose-100"] { background-color:rgba(248,113,113,.19)!important }
+html[data-tema="gelap"] [class~="bg-violet-100"] { background-color:rgba(167,139,250,.19)!important }
+html[data-tema="gelap"] [class~="text-slate-800"] { color:var(--teks)!important }
+html[data-tema="gelap"] [class~="text-slate-700"] { color:#dcebf3!important }
+html[data-tema="gelap"] [class~="text-slate-600"] { color:#bcd3e0!important }
+html[data-tema="gelap"] [class~="text-slate-500"] { color:#a3c0d0!important }
+html[data-tema="gelap"] [class~="text-slate-400"] { color:#8aa9bb!important }
+html[data-tema="gelap"] [class~="text-slate-300"] { color:#5f8296!important }
+html[data-tema="gelap"] [class~="text-emerald-500"],
+html[data-tema="gelap"] [class~="text-emerald-600"] { color:#5ed2dd!important }
+html[data-tema="gelap"] [class~="text-emerald-700"] { color:#6edbe5!important }
+html[data-tema="gelap"] [class~="text-emerald-800"] { color:#8fe4ec!important }
+html[data-tema="gelap"] [class~="text-emerald-900"] { color:#a9ecf2!important }
+html[data-tema="gelap"] [class~="text-emerald-950"] { color:#d3f6f9!important }
+html[data-tema="gelap"] [class~="text-amber-500"],
+html[data-tema="gelap"] [class~="text-amber-600"],
+html[data-tema="gelap"] [class~="text-amber-700"] { color:#fcd34d!important }
+html[data-tema="gelap"] [class~="text-amber-800"],
+html[data-tema="gelap"] [class~="text-amber-900"] { color:#fde68a!important }
+html[data-tema="gelap"] [class~="text-blue-500"],
+html[data-tema="gelap"] [class~="text-blue-600"],
+html[data-tema="gelap"] [class~="text-blue-700"] { color:#7dd3fc!important }
+html[data-tema="gelap"] [class~="text-blue-800"],
+html[data-tema="gelap"] [class~="text-blue-900"] { color:#bae6fd!important }
+html[data-tema="gelap"] [class~="text-sky-800"],
+html[data-tema="gelap"] [class~="text-sky-900"] { color:#bae6fd!important }
+html[data-tema="gelap"] [class~="text-rose-500"],
+html[data-tema="gelap"] [class~="text-rose-600"],
+html[data-tema="gelap"] [class~="text-red-500"],
+html[data-tema="gelap"] [class~="text-red-600"] { color:#fda4af!important }
+html[data-tema="gelap"] [class~="text-rose-700"],
+html[data-tema="gelap"] [class~="text-rose-900"],
+html[data-tema="gelap"] [class~="text-red-800"] { color:#fecdd3!important }
+html[data-tema="gelap"] [class~="text-violet-700"] { color:#c4b5fd!important }
+html[data-tema="gelap"] [class~="border-slate-100"] { border-color:rgba(255,255,255,.07)!important }
+html[data-tema="gelap"] [class~="border-slate-200"],
+html[data-tema="gelap"] [class~="border-slate-200/80"] { border-color:rgba(255,255,255,.10)!important }
+html[data-tema="gelap"] [class~="border-slate-300"] { border-color:rgba(255,255,255,.16)!important }
+html[data-tema="gelap"] [class~="border-emerald-200"],
+html[data-tema="gelap"] [class~="border-emerald-300"],
+html[data-tema="gelap"] [class~="border-emerald-400"] { border-color:rgba(50,184,196,.38)!important }
+html[data-tema="gelap"] [class~="border-emerald-600"],
+html[data-tema="gelap"] [class~="border-emerald-700"],
+html[data-tema="gelap"] [class~="border-emerald-800"] { border-color:rgba(50,184,196,.55)!important }
+html[data-tema="gelap"] [class~="border-amber-200"],
+html[data-tema="gelap"] [class~="border-amber-300"] { border-color:rgba(250,204,21,.32)!important }
+html[data-tema="gelap"] [class~="border-blue-300"],
+html[data-tema="gelap"] [class~="border-blue-400"],
+html[data-tema="gelap"] [class~="border-sky-200"],
+html[data-tema="gelap"] [class~="border-sky-300"] { border-color:rgba(56,189,248,.36)!important }
+html[data-tema="gelap"] [class~="border-rose-200"],
+html[data-tema="gelap"] [class~="border-rose-300"],
+html[data-tema="gelap"] [class~="border-red-300"] { border-color:rgba(248,113,113,.38)!important }
+html[data-tema="gelap"] [class~="divide-slate-100"] > :not([hidden]) ~ :not([hidden]) { border-color:rgba(255,255,255,.07)!important }
+html[data-tema="gelap"] [class~="after:border-slate-300"]::after { border-color:transparent!important }
+html[data-tema="gelap"] [class~="hover:bg-slate-50"]:hover { background-color:rgba(255,255,255,.045)!important }
+html[data-tema="gelap"] [class~="hover:bg-slate-100"]:hover { background-color:rgba(255,255,255,.08)!important }
+html[data-tema="gelap"] [class~="hover:bg-slate-200"]:hover,
+html[data-tema="gelap"] [class~="hover:bg-slate-300"]:hover { background-color:rgba(255,255,255,.12)!important }
+html[data-tema="gelap"] [class~="hover:bg-white"]:hover { background-color:var(--panel3)!important }
+html[data-tema="gelap"] [class~="hover:bg-emerald-50"]:hover,
+html[data-tema="gelap"] [class~="hover:bg-emerald-50/40"]:hover { background-color:rgba(50,184,196,.12)!important }
+html[data-tema="gelap"] [class~="hover:bg-emerald-100"]:hover,
+html[data-tema="gelap"] [class~="hover:bg-emerald-100/70"]:hover { background-color:rgba(50,184,196,.22)!important }
+html[data-tema="gelap"] [class~="hover:bg-amber-50"]:hover { background-color:rgba(250,204,21,.12)!important }
+html[data-tema="gelap"] [class~="hover:bg-rose-50"]:hover,
+html[data-tema="gelap"] [class~="hover:bg-rose-100"]:hover { background-color:rgba(248,113,113,.16)!important }
+html[data-tema="gelap"] [class~="hover:bg-slate-800"]:hover,
+html[data-tema="gelap"] [class~="hover:bg-slate-900"]:hover { background-color:#356f8e!important }
+html[data-tema="gelap"] [class~="hover:text-slate-700"]:hover { color:#ffffff!important }
+html[data-tema="gelap"] [class~="hover:text-emerald-700"]:hover,
+html[data-tema="gelap"] [class~="hover:text-emerald-800"]:hover { color:#9be8ef!important }
+html[data-tema="gelap"] [class~="hover:text-blue-800"]:hover { color:#bae6fd!important }
+html[data-tema="gelap"] [class~="hover:text-red-700"]:hover,
+html[data-tema="gelap"] [class~="hover:text-rose-700"]:hover { color:#fecdd3!important }
+html[data-tema="gelap"] [class~="hover:border-emerald-300"]:hover,
+html[data-tema="gelap"] [class~="hover:border-emerald-600"]:hover { border-color:rgba(50,184,196,.6)!important }
+html[data-tema="gelap"] [class~="hover:border-amber-300"]:hover { border-color:rgba(250,204,21,.5)!important }
+html[data-tema="gelap"] [class~="focus:ring-emerald-50"]:focus { --tw-ring-color:rgba(50,184,196,.22)!important }
+html[data-tema="gelap"] [class~="outline-slate-800"] { outline-color:#e2f4f8!important }
+html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--panel)!important }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
@@ -194,83 +540,67 @@
   <!-- ============================================== -->
   <div id="sbOverlay" onclick="toggleSidebar(false)" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"></div>
 
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex flex-col bg-gradient-to-b from-sidogiri-950 via-sidogiri-900 to-sidogiri-800 text-white shadow-2xl border-r border-emerald-500/20">
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white text-slate-700 border-r border-slate-200/80 shadow-[2px_0_12px_-6px_rgba(16,24,40,.12)]">
     <!-- Brand -->
-    <div class="flex items-center gap-3 px-4 h-16 border-b border-white/10 shrink-0">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-lg shadow-md ring-2 ring-white/20 shrink-0">
-        <i class="fa-solid fa-mosque text-white"></i>
+    <div class="sb-brand flex items-center gap-3 px-4 h-16 border-b border-slate-100 shrink-0">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-lg text-white shadow-md shadow-emerald-500/30 shrink-0">
+        <i class="fa-solid fa-mosque"></i>
       </div>
       <div class="sb-label min-w-0 flex-1">
-        <div class="text-sm font-extrabold leading-tight truncate">Absensi Labsoma</div>
-        <div class="text-[10px] text-emerald-200/80 font-medium truncate">PP. Sidogiri • <span class="text-emerald-300 font-bold">v2.6</span></div>
+        <div class="text-sm font-extrabold leading-tight truncate text-slate-800">Absensi Labsoma</div>
+        <div class="text-[10.5px] text-slate-400 font-medium truncate">PP. Sidogiri • <span class="text-emerald-600 font-bold">v2.7</span></div>
       </div>
-      <button onclick="toggleSidebar(false)" class="lg:hidden w-8 h-8 rounded-lg hover:bg-white/10 text-white/80" title="Tutup menu">
+      <button onclick="toggleSidebar(false)" class="lg:hidden w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500" title="Tutup menu">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
 
     <!-- Navigasi -->
     <nav class="flex-1 overflow-y-auto custom-scroll px-3 pb-4 space-y-1">
-        <div data-grp-label="Presensi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-300/60">Presensi</div>
-        <div data-grp-label="Presensi" class="sb-divider hidden mx-3 my-3 border-t border-white/10"></div>
-        <button onclick="switchTab('kiosk')" id="tabBtn-kiosk" data-grp="Presensi" title="Kiosk Presensi" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <div data-grp-label="Presensi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Presensi</div>
+        <div data-grp-label="Presensi" class="sb-divider hidden mx-2 my-2 border-t border-slate-100"></div>
+        <button onclick="switchTab('kiosk')" id="tabBtn-kiosk" data-grp="Presensi" title="Kiosk Presensi" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-fingerprint w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Kiosk Presensi</span>
         </button>
-        <button onclick="switchTab('log')" id="tabBtn-log" data-grp="Presensi" title="Log Rekap Absen" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <button onclick="switchTab('log')" id="tabBtn-log" data-grp="Presensi" title="Log Rekap Absen" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-clipboard-list w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Log Rekap Absen</span>
         </button>
-        <div data-grp-label="Data Master" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-300/60">Data Master</div>
-        <div data-grp-label="Data Master" class="sb-divider hidden mx-3 my-3 border-t border-white/10"></div>
-        <button onclick="switchTab('peserta')" id="tabBtn-peserta" data-grp="Data Master" title="Data Peserta" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <div data-grp-label="Data Master" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Data Master</div>
+        <div data-grp-label="Data Master" class="sb-divider hidden mx-2 my-2 border-t border-slate-100"></div>
+        <button onclick="switchTab('peserta')" id="tabBtn-peserta" data-grp="Data Master" title="Data Peserta" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-users w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Data Peserta</span>
         </button>
-        <button onclick="switchTab('kesanggupan')" id="tabBtn-kesanggupan" data-grp="Data Master" title="Jadwal & Kesanggupan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <button onclick="switchTab('kesanggupan')" id="tabBtn-kesanggupan" data-grp="Data Master" title="Jadwal & Kesanggupan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-calendar-check w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Jadwal & Kesanggupan</span>
         </button>
-        <div data-grp-label="Rekapitulasi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-300/60">Rekapitulasi</div>
-        <div data-grp-label="Rekapitulasi" class="sb-divider hidden mx-3 my-3 border-t border-white/10"></div>
-        <button onclick="switchTab('koreksi')" id="tabBtn-koreksi" data-grp="Rekapitulasi" title="Koreksi Absen (Matriks)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <div data-grp-label="Rekapitulasi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Rekapitulasi</div>
+        <div data-grp-label="Rekapitulasi" class="sb-divider hidden mx-2 my-2 border-t border-slate-100"></div>
+        <button onclick="switchTab('koreksi')" id="tabBtn-koreksi" data-grp="Rekapitulasi" title="Koreksi Absen (Matriks)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-table-cells w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Koreksi Absen (Matriks)</span>
         </button>
-        <button onclick="switchTab('pimpinan')" id="tabBtn-pimpinan" data-grp="Rekapitulasi" title="Rekap Pekanan (Pimpinan)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <button onclick="switchTab('pimpinan')" id="tabBtn-pimpinan" data-grp="Rekapitulasi" title="Rekap Pekanan (Pimpinan)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-user-tie w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Rekap Pekanan (Pimpinan)</span>
         </button>
-        <button onclick="switchTab('total')" id="tabBtn-total" data-grp="Rekapitulasi" title="Total Bulanan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <button onclick="switchTab('total')" id="tabBtn-total" data-grp="Rekapitulasi" title="Total Bulanan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-chart-pie w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Total Bulanan</span>
         </button>
-        <button onclick="switchTab('kalender')" id="tabBtn-kalender" data-grp="Rekapitulasi" title="Kalender Bulanan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
-          <i class="fa-solid fa-calendar-week w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Kalender Bulanan</span><span class="sb-label ml-auto bg-amber-400 text-amber-950 text-[9px] font-black px-1.5 py-px rounded-full">BARU</span>
+        <button onclick="switchTab('kalender')" id="tabBtn-kalender" data-grp="Rekapitulasi" title="Kalender Bulanan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
+          <i class="fa-solid fa-calendar-week w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Kalender Bulanan</span><span class="sb-label ml-auto bg-amber-100 text-amber-700 text-[9px] font-black px-1.5 py-px rounded-full">BARU</span>
         </button>
-        <div data-grp-label="Administrasi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-300/60">Administrasi</div>
-        <div data-grp-label="Administrasi" class="sb-divider hidden mx-3 my-3 border-t border-white/10"></div>
-        <button onclick="switchTab('pengguna')" id="tabBtn-pengguna" data-grp="Administrasi" title="Pengguna & Hak Akses" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-emerald-100/90 hover:bg-white/10 hover:text-white transition-all">
+        <div data-grp-label="Administrasi" class="sb-label px-3 pt-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Administrasi</div>
+        <div data-grp-label="Administrasi" class="sb-divider hidden mx-2 my-2 border-t border-slate-100"></div>
+        <button onclick="switchTab('pengguna')" id="tabBtn-pengguna" data-grp="Administrasi" title="Pengguna & Hak Akses" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-user-shield w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Pengguna</span>
         </button>
     </nav>
 
     <!-- Footer sidebar -->
-    <div class="shrink-0 border-t border-white/10 p-3">
-      <!-- Kartu pengguna yang sedang login -->
-      <div class="mb-2 p-2 rounded-xl bg-black/20 flex items-center gap-2.5">
-        <div id="userAvatar" class="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 font-black flex items-center justify-center text-sm mx-auto">?</div>
-        <div class="sb-label min-w-0 flex-1">
-          <div id="userNama" class="text-xs font-bold truncate">-</div>
-          <div class="flex items-center gap-1 mt-0.5">
-            <span id="userRoleBadge" class="text-[9px] font-black px-1.5 py-px rounded bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">-</span>
-            <span id="userUsername" class="text-[10px] text-emerald-200/70 truncate font-mono"></span>
-          </div>
-        </div>
-      </div>
-      <div class="flex gap-1.5 mb-2">
-        <button onclick="openModalGantiPassword()" title="Ganti Password" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-[11px] font-semibold text-emerald-100 bg-white/5 hover:bg-white/15 transition">
-          <i class="fa-solid fa-key"></i><span class="sb-label">Password</span>
-        </button>
-        <button onclick="doLogout()" title="Keluar" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-[11px] font-semibold text-rose-100 bg-rose-500/20 hover:bg-rose-500/40 transition">
-          <i class="fa-solid fa-right-from-bracket"></i><span class="sb-label">Keluar</span>
-        </button>
-      </div>
-      <button onclick="toggleSidebar()" class="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-100 hover:bg-white/10 transition" title="Ciutkan / lebarkan menu">
+    <div class="shrink-0 border-t border-slate-100 p-2">
+      <button onclick="toggleSidebar()" class="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-50 hover:text-emerald-700 transition" title="Ciutkan / lebarkan menu">
         <i id="sbCollapseIcon" class="fa-solid fa-angles-left"></i><span class="sb-label">Ciutkan menu</span>
+      </button>
+      <button onclick="doLogout()" class="lg:hidden w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition">
+        <i class="fa-solid fa-right-from-bracket"></i> Keluar
       </button>
     </div>
   </aside>
@@ -281,22 +611,49 @@
   <div id="mainWrap" class="min-h-screen flex flex-col">
 
     <!-- Top bar -->
-    <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200 shadow-sm">
-      <div class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 h-16">
-        <button onclick="toggleSidebar()" class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition flex items-center justify-center" title="Tampilkan / sembunyikan menu">
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200/80">
+      <div class="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 h-16">
+        <button onclick="toggleSidebar()" class="w-10 h-10 shrink-0 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-emerald-700 transition flex items-center justify-center text-lg" title="Tampilkan / sembunyikan menu">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="min-w-0 flex-1">
-          <h1 id="pageTitle" class="text-[13px] sm:text-base font-extrabold text-slate-800 truncate flex items-center gap-2">
-            <i id="pageTitleIcon" class="fa-solid fa-fingerprint text-emerald-600"></i><span id="pageTitleText">Kiosk Presensi</span>
-          </h1>
-          <p class="hidden sm:block text-[11px] text-slate-500 truncate">Sistem Absensi & Database Labsoma • Pondok Pesantren Sidogiri</p>
+        <div class="flex-1"></div>
+
+        <!-- Tanggal Hijriah & jam -->
+        <div class="flex items-center gap-2 text-slate-600 min-w-0">
+          <i class="fa-regular fa-calendar-check text-emerald-600 text-base hidden sm:inline"></i>
+          <span id="liveHijriText" class="text-[11px] sm:text-sm font-medium truncate max-w-[130px] sm:max-w-none">Memuat kalender...</span>
+          <span class="text-slate-300 hidden sm:inline">·</span>
+          <i class="fa-regular fa-clock text-emerald-600 hidden sm:inline"></i>
+          <span id="liveClock" class="text-[11px] sm:text-sm font-semibold tabular-nums text-slate-700">00:00:00</span>
         </div>
-        <div class="text-right shrink-0 bg-gradient-to-br from-sidogiri-900 to-sidogiri-800 text-white px-2.5 sm:px-3 py-1.5 rounded-xl shadow-sm">
-          <div id="liveClock" class="text-sm sm:text-xl font-black font-mono tracking-wider text-emerald-300 leading-none">00:00:00</div>
-          <div id="liveHijriDate" class="text-[9.5px] sm:text-[11px] font-semibold text-emerald-100 mt-0.5 flex items-start justify-end gap-1 max-w-[118px] sm:max-w-none leading-tight">
-            <i class="fa-regular fa-calendar-check text-amber-300 hidden sm:inline mt-px"></i>
-            <span id="liveHijriText">Memuat kalender...</span>
+
+        <button type="button" id="btnTema" onclick="gantiTema()" title="Ganti tema terang / gelap" aria-label="Ganti tema">
+          <i id="ikonTema" class="fa-solid fa-moon"></i>
+        </button>
+
+        <span class="w-px h-8 bg-slate-200 hidden sm:block"></span>
+
+        <!-- Pengguna -->
+        <div class="relative shrink-0">
+          <button onclick="toggleUserMenu(event)" class="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition">
+            <span id="userAvatar" class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">?</span>
+            <span class="hidden md:block text-left">
+              <span id="userNama" class="block text-[13px] font-semibold text-slate-700 uppercase tracking-wide max-w-[220px] truncate leading-tight">-</span>
+              <span class="block text-[10.5px] text-slate-400 leading-tight"><span id="userRoleBadge">-</span></span>
+            </span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden md:block"></i>
+          </button>
+          <div id="userMenu" class="hidden absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+            <div class="px-4 py-2 border-b border-slate-100">
+              <div id="userMenuNama" class="text-sm font-bold text-slate-800 truncate">-</div>
+              <div class="text-[11px] text-slate-400 font-mono truncate" id="userUsername"></div>
+            </div>
+            <button onclick="closeUserMenu(); openModalGantiPassword()" class="w-full text-left px-4 py-2.5 text-[13px] text-slate-600 hover:bg-slate-50 flex items-center gap-2.5">
+              <i class="fa-solid fa-key w-4 text-slate-400"></i> Ganti Password
+            </button>
+            <button onclick="closeUserMenu(); doLogout()" class="w-full text-left px-4 py-2.5 text-[13px] text-rose-600 hover:bg-rose-50 flex items-center gap-2.5">
+              <i class="fa-solid fa-right-from-bracket w-4"></i> Keluar
+            </button>
           </div>
         </div>
       </div>
@@ -307,6 +664,19 @@
 
   <main class="w-full max-w-[1600px] mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-1">
 
+    <!-- Judul halaman -->
+    <div class="flex items-start justify-between gap-3 mb-4 sm:mb-5">
+      <div class="min-w-0">
+        <h1 id="pageTitle" class="text-lg sm:text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
+          <i id="pageTitleIcon" class="fa-solid fa-fingerprint text-emerald-600 text-base sm:text-xl hidden"></i><span id="pageTitleText">Kiosk Presensi</span>
+        </h1>
+        <p class="text-[11.5px] sm:text-xs text-slate-500 mt-0.5">Instansi <b class="text-emerald-700">LABSOMA</b> · <span id="pageSubtitle">Pondok Pesantren Sidogiri</span></p>
+      </div>
+      <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-[11px] font-semibold text-slate-600 shadow-sm shrink-0">
+        <i class="fa-solid fa-building-columns text-emerald-600"></i> LABSOMA
+      </span>
+    </div>
+
 
 
     <!-- ============================================== -->
@@ -314,7 +684,7 @@
     <!-- ============================================== -->
     <div id="tabContent-kiosk" class="tab-content block">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6 flex flex-col justify-between">
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6 flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 text-slate-800 font-bold mb-4 text-sm">
               <i class="fa-solid fa-barcode text-emerald-600"></i> Pindai Kartu / Input ID Peserta
@@ -352,7 +722,7 @@
           </div>
         </div>
 
-        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6 flex flex-col min-w-0">
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6 flex flex-col min-w-0">
           <div class="flex justify-between items-center mb-4">
             <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
               <i class="fa-solid fa-clipboard-check text-emerald-600"></i> Kehadiran Terbaru Hari Ini
@@ -389,7 +759,7 @@
     <!-- TAB 2: DATA PESERTA                            -->
     <!-- ============================================== -->
     <div id="tabContent-peserta" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div>
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -429,7 +799,7 @@
     <!-- TAB 3: LOG REKAP ABSEN (SINGLE SOURCE OF TRUTH) -->
     <!-- ============================================== -->
     <div id="tabContent-log" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         
         <!-- Header Menu Meniru Gambar Satunya -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 pb-3 border-b border-slate-100">
@@ -583,7 +953,7 @@
     <!-- TAB 4: KOREKSI ABSEN (MATRIKS 30 HARI HIJRIAH) -->
     <!-- ============================================== -->
     <div id="tabContent-koreksi" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
           <div>
@@ -664,7 +1034,7 @@
     <!-- TAB 5: REKAP PEKANAN (9 PIMPINAN: TERMASUK TU I & TU II) -->
     <!-- ============================================== -->
     <div id="tabContent-pimpinan" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
           <div>
@@ -751,7 +1121,7 @@
     <!-- ============================================== -->
     <div id="tabContent-total" class="tab-content hidden">
       
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 mb-5 p-4 bg-white rounded-2xl shadow-sm border border-slate-200/80">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 mb-5 p-4 bg-white rounded-2xl shadow-card border border-slate-100">
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
             <i class="fa-solid fa-chart-pie text-emerald-600"></i> Akumulasi Total Presensi Bulanan
@@ -789,41 +1159,27 @@
 
       <!-- Ringkasan KPI Card -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-5 sm:mb-6">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shadow-inner">
-            <i class="fa-solid fa-clock"></i>
-          </div>
-          <div>
-            <div class="text-xs text-slate-500 font-semibold">Total Jam Realita Seluruh Anggota</div>
-            <div id="kpiTotalJam" class="text-xl font-extrabold text-slate-800">--:--:--</div>
-            <div class="text-[10px] text-emerald-700 font-medium mt-0.5">Akumulasi realita log presensi</div>
-          </div>
+        <div class="kpi kpi-green">
+          <div id="kpiTotalJam" class="kpi-val">--:--:--</div>
+          <div class="kpi-label">Total Jam Realita</div>
+          <div class="kpi-sub">Akumulasi log presensi seluruh anggota</div>
+          <div class="kpi-ico"><span><i class="fa-solid fa-clock"></i></span></div>
         </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl shadow-inner">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
-          <div>
-            <div class="text-xs text-slate-500 font-semibold">Total Hari Masuk (Piket)</div>
-            <div id="kpiTotalHari" class="text-xl font-extrabold text-slate-800">-- Hari</div>
-            <div id="kpiTotalHariAktifSub" class="text-[10px] text-blue-700 font-medium mt-0.5">Dari total hari kewajiban aktif</div>
-          </div>
+        <div class="kpi kpi-blue">
+          <div id="kpiTotalHari" class="kpi-val">-- Hari</div>
+          <div class="kpi-label">Total Hari Masuk (Piket)</div>
+          <div id="kpiTotalHariAktifSub" class="kpi-sub">Dari total hari kewajiban aktif</div>
+          <div class="kpi-ico"><span><i class="fa-solid fa-calendar-check"></i></span></div>
         </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl shadow-inner">
-            <i class="fa-solid fa-hourglass-half"></i>
-          </div>
-          <div>
-            <div class="text-xs text-slate-500 font-semibold">Rata-rata Jam per Hari Hadir</div>
-            <div id="kpiRataRata" class="text-xl font-extrabold text-slate-800">--:--:--</div>
-            <div class="text-[10px] text-purple-700 font-medium mt-0.5">Rata-rata jam piket saat masuk</div>
-          </div>
+        <div class="kpi kpi-orange">
+          <div id="kpiRataRata" class="kpi-val">--:--:--</div>
+          <div class="kpi-label">Rata-rata Jam / Hari Hadir</div>
+          <div class="kpi-sub">Rata-rata jam piket saat masuk</div>
+          <div class="kpi-ico"><span><i class="fa-solid fa-chart-line"></i></span></div>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-4">
           <div class="text-xs text-slate-500 font-medium">
             <span id="totalCountText">Menampilkan seluruh peserta dan evaluasi jam wajib</span>
@@ -865,7 +1221,7 @@
     <!-- TAB 7: MENU KESANGGUPAN (HARI & JAM KERJA)     -->
     <!-- ============================================== -->
     <div id="tabContent-kesanggupan" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5 pb-4 border-b border-slate-100">
           <div>
@@ -935,7 +1291,7 @@
     <!-- TAB 8: KALENDER BULANAN (REKAP SELURUH 1 BULAN) -->
     <!-- ============================================== -->
     <div id="tabContent-kalender" class="tab-content hidden">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
 
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
           <div>
@@ -1032,7 +1388,7 @@
     <!-- ============================================== -->
     <div id="tabContent-pengguna" class="tab-content hidden">
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4" id="penggunaStats"></div>
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-6">
+      <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 mb-4 pb-4 border-b border-slate-100">
           <div>
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -1604,6 +1960,10 @@
       return `${pad(Math.floor(diff / 3600))}:${pad(Math.floor(diff % 3600 / 60))}:${pad(diff % 60)}`;
     }
 
+    function getNamaBulanClient(m) {
+      return ['', 'Muharram', 'Shafar', "Rabi'ul Awwal", "Robi'uts Tsani", 'Jumadil Ula', 'Jumadil Akhirah', 'Rajab', "Sya'ban", 'Ramadhan', 'Syawwal', "Dzulqa'dah", 'Dzulhijjah'][+m] || '';
+    }
+
     function tglKeAngka(t) {
       const p = String(t || '').split('/');
       return p.length === 3 ? (+p[2]) * 10000 + (+p[1]) * 100 + (+p[0]) : 0;
@@ -1630,6 +1990,8 @@
           const gantiHari = infoHariIni && infoHariIni.raw !== info.raw;
           infoHariIni = info;
           document.getElementById('liveHijriText').textContent = info.teksLengkap;
+          const sub = document.getElementById('pageSubtitle');
+          if (sub) sub.textContent = getNamaBulanClient(info.bulan) + ' ' + info.tahun + ' H';
           ['filterLogTglMulai', 'filterLogTglSelesai', 'importDefaultTgl'].forEach(id => {
             const el = document.getElementById(id);
             if (el && !el.value) el.value = info.raw;
@@ -1673,6 +2035,14 @@
       const inT = document.getElementById('filterTotalTahun'); if (inT) inT.value = activeTahun;
       const inC = document.getElementById('filterKalenderTahun'); if (inC) inC.value = activeTahun;
     }
+
+    // ===== MENU PENGGUNA (top bar) =====
+    function toggleUserMenu(e) {
+      e.stopPropagation();
+      document.getElementById('userMenu').classList.toggle('hidden');
+    }
+    function closeUserMenu() { document.getElementById('userMenu').classList.add('hidden'); }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#userMenu')) closeUserMenu(); });
 
     // ===== SIDEBAR =====
     const isLayarLebar = () => window.matchMedia('(min-width: 1024px)').matches;
@@ -2919,7 +3289,7 @@
     const CSS_CETAK = `
       @page { size: A4 landscape; margin: 12mm; }
       * { box-sizing: border-box; }
-      body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; color: #0f172a; font-size: 10.5px; margin: 0; }
+      body { font-family: 'Inter', Arial, sans-serif; color: #0f172a; font-size: 10.5px; margin: 0; }
       .kop { display: flex; align-items: center; gap: 14px; border-bottom: 3px double #065f46; padding-bottom: 8px; margin-bottom: 10px; }
       .logo { width: 46px; height: 46px; border-radius: 10px; background: #047857; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; }
       .kop h1 { margin: 0; font-size: 16px; letter-spacing: .5px; color: #064e3b; }
@@ -2966,7 +3336,7 @@
     // Buka jendela cetak; bila popup diblokir, pakai iframe tersembunyi
     function cetakHTML(judul, isi) {
       const html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${esc(judul)}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
         <style>${CSS_CETAK}</style></head><body>${isi}
         <div class="foot">Dicetak dari Sistem Absensi Labsoma • ${esc(infoHariIni ? infoHariIni.teksLengkap : '')} • ${new Date().toLocaleString('id-ID')}</div>
         </body></html>`;
@@ -3132,25 +3502,26 @@
       // KPI
       const pct = v.target > 0 ? (v.total / v.target * 100) : 0;
       const pctB = v.targetBerjalan > 0 ? (v.total / v.targetBerjalan * 100) : 0;
-      const warna = pct >= 100 ? 'bg-emerald-500' : (pct >= 70 ? 'bg-amber-400' : 'bg-rose-400');
-      const kartu = (ikon, warnaIkon, judul, nilai, sub) => `
-        <div class="p-3 sm:p-4 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3 min-w-0">
-          <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-xl ${warnaIkon} items-center justify-center"><i class="fa-solid ${ikon}"></i></div>
-          <div class="min-w-0"><div class="text-[10.5px] sm:text-[11px] text-slate-500 font-semibold leading-tight">${judul}</div>
-          <div class="text-[15px] sm:text-lg font-extrabold text-slate-800 font-mono leading-tight mt-0.5">${nilai}</div>
-          <div class="text-[10px] text-slate-400 font-medium truncate">${sub}</div></div></div>`;
+      const kartu = (ikon, warna, judul, nilai, sub) => `
+        <div class="kpi ${warna}">
+          <div class="kpi-val font-mono">${nilai}</div>
+          <div class="kpi-label">${judul}</div>
+          <div class="kpi-sub truncate pr-16">${sub}</div>
+          <div class="kpi-ico"><span><i class="fa-solid ${ikon}"></i></span></div>
+        </div>`;
       document.getElementById('kalenderKpi').innerHTML =
-        kartu('fa-clock', 'bg-emerald-100 text-emerald-700', 'Total Jam Realita', fmtDetik(v.total),
+        kartu('fa-clock', 'kpi-green', 'Total Jam Realita', fmtDetik(v.total),
           v.single ? esc(v.single.nama) : `${v.list.length} orang`) +
-        kartu('fa-calendar-check', 'bg-blue-100 text-blue-700', v.single ? 'Hari Masuk / Hari Aktif' : 'Orang-hari Masuk / Aktif',
+        kartu('fa-calendar-check', 'kpi-teal', v.single ? 'Hari Masuk / Aktif' : 'Orang-hari Masuk / Aktif',
           `${v.hariMasuk} / ${v.hariAktif}`, v.single ? 'hari hadir dari hari kewajiban' : 'akumulasi semua orang') +
-        kartu('fa-bullseye', 'bg-amber-100 text-amber-700', 'Target Jam Bulan Ini', fmtDetik(v.target),
+        kartu('fa-bullseye', 'kpi-blue', 'Target Jam Bulan Ini', fmtDetik(v.target),
           `s/d hari ini: ${fmtDetik(v.targetBerjalan)}`) +
-        `<div class="p-3 sm:p-4 rounded-2xl border border-slate-200 bg-white shadow-sm min-w-0">
-          <div class="flex justify-between items-baseline"><span class="text-[11px] text-slate-500 font-semibold">Capaian</span>
-          <span class="text-lg font-extrabold text-slate-800">${pct.toFixed(1)}%</span></div>
-          <div class="mt-2 h-2 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${warna} rounded-full" style="width:${Math.min(pct, 100)}%"></div></div>
-          <div class="text-[10px] text-slate-400 font-medium mt-1.5">Capaian berjalan (s/d hari ini): <b class="text-slate-600">${pctB.toFixed(1)}%</b></div>
+        `<div class="kpi kpi-orange">
+          <div class="kpi-val">${pct.toFixed(1)}%</div>
+          <div class="kpi-label">Capaian Bulan Ini</div>
+          <div class="kpi-bar"><div style="width:${Math.min(pct, 100)}%"></div></div>
+          <div class="kpi-sub">Berjalan (s/d hari ini): <b>${pctB.toFixed(1)}%</b></div>
+          <div class="kpi-ico"><span><i class="fa-solid fa-chart-line"></i></span></div>
         </div>`;
 
       // Grid: kolom pertama = Sabtu. dayIdx: 0=Ahad..6=Sabtu -> kolom (dayIdx+1)%7
@@ -3267,8 +3638,13 @@
               </tr>`; }).join('')}
               </tbody></table>
             </div>`;
+        } else if (b.sec > 0 && !b.p.sesiHarian) {
+          // Server (Code.gs) masih versi lama: belum mengirim rincian jam masuk/keluar
+          daftar = `<div class="m-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Rincian jam masuk/keluar belum bisa ditampilkan karena <b>Code.gs di Apps Script masih versi lama</b>.
+            Admin: ganti Code.gs dengan versi terbaru, lalu <b>Terapkan → Kelola deployment → Edit → Versi baru → Terapkan</b>.</div>`;
         } else if (b.sec > 0) {
-          daftar = `<div class="px-4 py-3 text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i> Durasi berasal dari data koreksi lama, jam masuk/keluar tidak tercatat.</div>`;
+          daftar = `<div class="px-4 py-3 text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i> Durasi ini berasal dari Koreksi Absen (input durasi langsung), jadi jam masuk/keluar tidak tercatat.</div>`;
         } else {
           daftar = `<div class="px-4 py-3 text-xs text-slate-400">Tidak ada catatan presensi pada tanggal ini.</div>`;
         }
@@ -3465,8 +3841,9 @@
         l.style.display = ada ? '' : 'none';
       });
       document.getElementById('userNama').textContent = u.nama || u.username;
+      document.getElementById('userMenuNama').textContent = u.nama || u.username;
       document.getElementById('userUsername').textContent = '@' + u.username;
-      document.getElementById('userRoleBadge').textContent = LABEL_PERAN[u.role] || u.role;
+      document.getElementById('userRoleBadge').textContent = (LABEL_PERAN[u.role] || u.role) + (u.jabatan && u.role !== 'ADMIN' ? ' · ' + u.jabatan : '');
       document.getElementById('userAvatar').textContent = String(u.nama || u.username).replace(/^(Ust\.?|M\.)\s*/i, '').charAt(0).toUpperCase();
       document.getElementById('userAvatar').title = `${u.nama} (${u.role})`;
 
@@ -3561,14 +3938,14 @@
     function renderStatPengguna() {
       const hit = r => cachePengguna.filter(u => u.role === r).length;
       const tanpa = cachePesertaAkun.filter(p => !p.akun).length;
-      const kartu = (ikon, warna, judul, nilai) => `<div class="p-3 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-        <div class="w-10 h-10 shrink-0 rounded-xl ${warna} flex items-center justify-center"><i class="fa-solid ${ikon}"></i></div>
-        <div><div class="text-[11px] text-slate-500 font-semibold">${judul}</div><div class="text-lg font-extrabold text-slate-800">${nilai}</div></div></div>`;
+      const kartu = (ikon, warna, judul, nilai) => `<div class="kpi ${warna}">
+        <div class="kpi-val">${nilai}</div><div class="kpi-label">${judul}</div>
+        <div class="kpi-ico"><span><i class="fa-solid ${ikon}"></i></span></div></div>`;
       document.getElementById('penggunaStats').innerHTML =
-        kartu('fa-user-gear', 'bg-slate-100 text-slate-700', 'Admin', hit('ADMIN')) +
-        kartu('fa-user-tie', 'bg-emerald-100 text-emerald-700', 'Pimpinan', hit('PIMPINAN')) +
-        kartu('fa-chalkboard-user', 'bg-blue-100 text-blue-700', 'Guru / Anggota', hit('GURU')) +
-        kartu('fa-user-xmark', 'bg-amber-100 text-amber-700', 'Peserta belum punya akun', tanpa);
+        kartu('fa-user-gear', 'kpi-green', 'Admin', hit('ADMIN')) +
+        kartu('fa-user-tie', 'kpi-teal', 'Pimpinan', hit('PIMPINAN')) +
+        kartu('fa-chalkboard-user', 'kpi-blue', 'Guru / Anggota', hit('GURU')) +
+        kartu('fa-user-xmark', 'kpi-orange', 'Belum punya akun', tanpa);
     }
 
     function renderPengguna() {
@@ -3739,9 +4116,45 @@
       }
     }
 
+    // ===== TEMA TERANG / GELAP (selaras dengan Labsoma) =====
+    const KUNCI_TEMA = 'labsoma-theme';           // kunci yang sama dengan aplikasi Labsoma
+    const diDalamLabsoma = (() => { try { return window.parent !== window && !!window.parent.document.body; } catch (e) { return false; } })();
+    function terapkanTema(t) {
+      const gelap = t !== 'light';
+      document.documentElement.setAttribute('data-tema', gelap ? 'gelap' : 'terang');
+      const ik = document.getElementById('ikonTema');
+      if (ik) ik.className = 'fa-solid ' + (gelap ? 'fa-sun' : 'fa-moon');
+      const b = document.getElementById('btnTema');
+      if (b) b.title = gelap ? 'Ganti ke tema terang' : 'Ganti ke tema gelap';
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = gelap ? '#071925' : '#0b2738';
+    }
+    function temaSekarang() { return document.documentElement.getAttribute('data-tema') === 'gelap' ? 'dark' : 'light'; }
+    function gantiTema() {
+      const baru = temaSekarang() === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(KUNCI_TEMA, baru); } catch (e) {}
+      terapkanTema(baru);
+    }
+    // Ikuti perubahan tema dari Labsoma / tab lain secara langsung
+    window.addEventListener('storage', (e) => { if (e.key === KUNCI_TEMA && e.newValue) terapkanTema(e.newValue); });
+    function pantauTemaLabsoma() {
+      if (!diDalamLabsoma) return;
+      try {
+        const bodyInduk = window.parent.document.body;
+        const ikut = () => { if (bodyInduk.dataset.theme) terapkanTema(bodyInduk.dataset.theme); };
+        ikut();
+        new MutationObserver(ikut).observe(bodyInduk, { attributes: true, attributeFilter: ['data-theme'] });
+        const b = document.getElementById('btnTema');
+        if (b) b.style.display = 'none';            // di dalam Labsoma, tema diatur dari tombol tema Labsoma
+      } catch (e) {}
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      terapkanTema(temaSekarang());
+      pantauTemaLabsoma();
       startClock();
-      try { if (localStorage.getItem('labsoma_sb_mini') === '1') document.body.classList.add('sb-mini'); } catch (e) {}
+      // Default laptop: sidebar ramping (ikon saja) seperti dashboard modern; pilihan user diingat
+      try { const m = localStorage.getItem('labsoma_sb_mini'); if (m === null || m === '1') document.body.classList.add('sb-mini'); } catch (e) { document.body.classList.add('sb-mini'); }
       // Saat ukuran layar berubah (putar HP / perbesar jendela) bersihkan status laci
       window.matchMedia('(min-width: 1024px)').addEventListener('change', () => document.body.classList.remove('sb-open'));
       document.getElementById('logIdPerson').addEventListener('change', autoIsiLogDariId);
