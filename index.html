@@ -578,8 +578,8 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
         <button onclick="switchTab('koreksi')" id="tabBtn-koreksi" data-grp="Rekapitulasi" title="Koreksi Absen (Matriks)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-table-cells w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Koreksi Absen (Matriks)</span>
         </button>
-        <button onclick="switchTab('pimpinan')" id="tabBtn-pimpinan" data-grp="Rekapitulasi" title="Rekap Pekanan (Pimpinan)" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
-          <i class="fa-solid fa-user-tie w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Rekap Pekanan (Pimpinan)</span>
+        <button onclick="switchTab('pimpinan')" id="tabBtn-pimpinan" data-grp="Rekapitulasi" title="Rekap" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
+          <i class="fa-solid fa-calendar-days w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Rekap</span>
         </button>
         <button onclick="switchTab('total')" id="tabBtn-total" data-grp="Rekapitulasi" title="Total Bulanan" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:bg-slate-50 hover:text-emerald-700 transition-all">
           <i class="fa-solid fa-chart-pie w-5 text-center text-[15px] shrink-0"></i><span class="sb-label truncate">Total Bulanan</span>
@@ -1031,33 +1031,35 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
     </div>
 
     <!-- ============================================== -->
-    <!-- TAB 5: REKAP PEKANAN (9 PIMPINAN: TERMASUK TU I & TU II) -->
+    <!-- TAB 5: REKAP PEKANAN (SELURUH / PIMPINAN / ANGGOTA) -->
+    <!-- Sumber data sama dengan Kalender Bulanan       -->
     <!-- ============================================== -->
     <div id="tabContent-pimpinan" class="tab-content hidden">
       <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 sm:p-6">
-        
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
-          <div>
+
+        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+          <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-user-shield text-emerald-600"></i> Rekapitulasi Presensi Mingguan (Pimpinan Labsoma)
+                <i class="fa-solid fa-calendar-days text-emerald-600"></i> Rekapitulasi Presensi
               </h2>
-              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
-                9 Pimpinan (Kepala, Wakil I-VI, TU I & TU II)
-              </span>
-              <span id="pimpinanPeriodeBadge" class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-0.5 rounded-full border border-slate-200">
+              <span id="pekananKategoriBadge" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">Seluruh Peserta</span>
+              <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-0.5 rounded-full border border-slate-200">
                 <span id="pimpinanPeriodeText">Memuat periode...</span>
               </span>
             </div>
             <p class="text-xs text-slate-500 mt-1">
-              <strong>Hari Aktif</strong> adalah hari yang disanggupi & bukan libur. <strong>Hari Masuk</strong> adalah total hari peserta hadir piket di Log Rekap Absen.
+              <strong>Hari Aktif</strong> = hari yang disanggupi & bukan libur. <strong>Hari Masuk</strong> = hari hadir piket di Log Rekap Absen.
+              Pilih satu pekan, atau <strong>Custom</strong> untuk rentang tanggal bebas (misal tgl 2–9), untuk melihat rincian per tanggal.
             </p>
           </div>
 
-          <!-- Filter Bulan & Tahun Hijriah -->
+          <!-- Tahun | Bulan | Pekan -->
           <div class="flex flex-wrap items-center gap-2 bg-slate-50/80 p-2 rounded-xl border border-slate-200">
-            <span class="text-xs font-medium text-slate-600">Pilih Bulan:</span>
-            <select id="filterPimpinanBulan" onchange="syncBulanSelector(this.value)" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg outline-none bg-white font-semibold focus:border-emerald-600">
+            <span class="text-xs font-medium text-slate-600">Tahun:</span>
+            <input type="number" id="filterPimpinanTahun" onchange="syncTahunInput(this.value); applyPimpinanFilter()" value="1448" min="1440" max="1500" class="w-16 px-2 py-1.5 text-xs border border-slate-300 rounded-lg outline-none font-mono bg-white text-center font-bold">
+            <span class="text-xs font-medium text-slate-600">Bulan:</span>
+            <select id="filterPimpinanBulan" onchange="syncBulanSelector(this.value); applyPimpinanFilter()" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg outline-none bg-white font-semibold focus:border-emerald-600">
               <option value="1">01 - Muharram</option>
               <option value="2">02 - Shafar</option>
               <option value="3">03 - Rabi'ul Awwal</option>
@@ -1071,43 +1073,71 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
               <option value="11">11 - Dzulqa'dah</option>
               <option value="12">12 - Dzulhijjah</option>
             </select>
-
-            <span class="text-xs font-medium text-slate-600">Tahun:</span>
-            <input type="number" id="filterPimpinanTahun" onchange="syncTahunInput(this.value)" value="1448" min="1440" max="1500" class="w-16 px-2 py-1.5 text-xs border border-slate-300 rounded-lg outline-none font-mono bg-white text-center font-bold">
-
-            <button onclick="applyPimpinanFilter()" class="px-3.5 py-1.5 btn-bpsti-filter font-bold rounded-lg text-xs transition shadow-sm flex items-center gap-1">
-              <i class="fa-solid fa-filter"></i> Filter
-            </button>
-            <span class="w-px h-6 bg-slate-300 mx-1"></span>
-            <button onclick="cetakRekapPimpinan()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs transition shadow-sm flex items-center gap-1.5">
-              <i class="fa-solid fa-print"></i> Cetak
-            </button>
+            <span class="text-xs font-medium text-slate-600">Pekan:</span>
+            <select id="filterPekan" onchange="onPekanChange()" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg outline-none bg-white font-semibold focus:border-emerald-600">
+              <option value="0">Semua Pekan</option>
+              <option value="1">Pekan 1 (Tgl 1-7)</option>
+              <option value="2">Pekan 2 (Tgl 8-14)</option>
+              <option value="3">Pekan 3 (Tgl 15-21)</option>
+              <option value="4">Pekan 4 (Tgl 22-akhir)</option>
+              <option value="C">Custom (pilih tanggal)</option>
+            </select>
+            <span id="pekananCustomWrap" class="hidden items-center gap-1.5">
+              <span class="text-xs font-medium text-slate-600">Tgl</span>
+              <input type="number" id="pekananDari" value="1" min="1" max="30" oninput="renderRekapPekanan()" class="w-14 px-2 py-1.5 text-xs border border-slate-300 rounded-lg outline-none font-mono bg-white text-center font-bold">
+              <span class="text-xs font-medium text-slate-600">s/d</span>
+              <input type="number" id="pekananSampai" value="7" min="1" max="30" oninput="renderRekapPekanan()" class="w-14 px-2 py-1.5 text-xs border border-slate-300 rounded-lg outline-none font-mono bg-white text-center font-bold">
+            </span>
+            <button onclick="applyPimpinanFilter(true)" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-medium transition" title="Segarkan data"><i class="fa-solid fa-rotate"></i></button>
+            <span class="w-px h-6 bg-slate-300 mx-0.5 hidden sm:block"></span>
+            <!-- Cetak: 2 pilihan -->
+            <div class="relative">
+              <button onclick="toggleMenuCetakPekanan(event)" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs transition shadow-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-print"></i> Cetak <i class="fa-solid fa-chevron-down text-[9px] opacity-70"></i>
+              </button>
+              <div id="menuCetakPekanan" class="hidden absolute right-0 mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40">
+                <button onclick="cetakRekapPekanan('lengkap')" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-start gap-2.5">
+                  <i class="fa-solid fa-table text-emerald-600 mt-0.5"></i>
+                  <span><span class="block text-xs font-bold text-slate-800">Tampil Semua</span>
+                  <span class="block text-[10.5px] text-slate-500">Seluruh kolom seperti di layar</span></span>
+                </button>
+                <button onclick="cetakRekapPekanan('ringkas')" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-start gap-2.5">
+                  <i class="fa-solid fa-list-check text-blue-600 mt-0.5"></i>
+                  <span><span class="block text-xs font-bold text-slate-800">Ringkas</span>
+                  <span class="block text-[10.5px] text-slate-500">No · Nama · Jabatan · Hari Aktif · Hari Masuk · Status</span></span>
+                </button>
+              </div>
+            </div>
             <button onclick="unduhExcelPimpinan()" class="px-3.5 py-1.5 bg-white border border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold rounded-lg text-xs transition shadow-sm flex items-center gap-1.5">
               <i class="fa-solid fa-file-excel"></i> Excel
             </button>
           </div>
         </div>
 
+        <!-- Info pemilik data (Pimpinan) -->
+        <div id="pekananMyInfo" class="hidden mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-user-check text-emerald-600"></i> <span id="pekananMyInfoText">Data Anda</span>
+        </div>
+
+        <!-- Kategori & pencarian (khusus Admin) -->
+        <div id="pekananFilterAdmin" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start">
+            <button onclick="setPekananKategori('ALL')" id="pkKat-ALL" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">Seluruh</button>
+            <button onclick="setPekananKategori('PIMPINAN')" id="pkKat-PIMPINAN" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">Pimpinan</button>
+            <button onclick="setPekananKategori('ANGGOTA')" id="pkKat-ANGGOTA" class="px-3 py-1.5 rounded-lg text-xs font-bold transition">Anggota</button>
+          </div>
+          <input type="text" id="searchPekananInput" oninput="renderRekapPekanan()" placeholder="Cari Nama / Jabatan..." class="w-full sm:w-60 px-3 py-1.5 text-xs border border-slate-300 rounded-lg outline-none focus:border-emerald-600 bg-white">
+        </div>
+
+        <!-- Ringkasan -->
+        <div id="pekananKpi" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4"></div>
+
+        <!-- Info pekan terpilih -->
+        <div id="pekananInfoPekan" class="hidden mb-3 text-xs text-slate-600 font-medium"></div>
+
         <div class="overflow-x-auto custom-scroll border border-slate-200 rounded-xl">
           <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-              <tr>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 w-10">No</th>
-                <th class="py-2.5 px-4 border-r border-slate-200 min-w-[180px]">Nama Pimpinan</th>
-                <th class="py-2.5 px-3 border-r border-slate-200 min-w-[130px]">Jabatan</th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200">Kesanggupan / Hari</th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-emerald-50/50">Pekan 1<br><span class="text-[10px] text-slate-400 font-normal">Tgl 1 - 7</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-emerald-50/50">Pekan 2<br><span class="text-[10px] text-slate-400 font-normal">Tgl 8 - 14</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-emerald-50/50">Pekan 3<br><span class="text-[10px] text-slate-400 font-normal">Tgl 15 - 21</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-emerald-50/50">Pekan 4<br><span class="text-[10px] text-slate-400 font-normal">Tgl 22 - 30</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 font-extrabold bg-slate-100 text-emerald-900">Total Realita Jam</th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200">Target Jam (Wajib)</th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-amber-50/50" title="Total hari yang disanggupi (selain Jum'at & hari izin)">Hari Aktif<br><span class="text-[10px] text-amber-700 font-medium">Kewajiban</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200 bg-blue-50/50" title="Total hari peserta hadir piket di Log Absen">Hari Masuk<br><span class="text-[10px] text-blue-700 font-medium">Hadir Piket</span></th>
-                <th class="py-2.5 px-3 text-center border-r border-slate-200">Rata-rata / Hari</th>
-                <th class="py-2.5 px-4 text-center">Status Capaian</th>
-              </tr>
-            </thead>
+            <thead id="pekananThead" class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200"></thead>
             <tbody id="pimpinanTbody" class="divide-y divide-slate-100">
               <tr><td colspan="14" class="py-8 text-center text-slate-400">Memuat rekapitulasi pekanan...</td></tr>
             </tbody>
@@ -1394,7 +1424,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-user-shield text-emerald-600"></i> Pengguna & Hak Akses
             </h2>
-            <p class="text-xs text-slate-500 mt-1 max-w-2xl">Akun Pimpinan & Guru wajib terhubung ke <b>Data Peserta</b>. Peran mengikuti jabatan: 9 pimpinan menjadi <b>PIMPINAN</b> (Rekap Pekanan & Kalender), selainnya <b>GURU</b> (Kalender). Masing-masing hanya bisa melihat datanya sendiri.</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-2xl">Akun Pimpinan & Guru wajib terhubung ke <b>Data Peserta</b>. Peran mengikuti jabatan: 9 pimpinan menjadi <b>PIMPINAN</b> (Rekap & Kalender), selainnya <b>GURU</b> (Kalender). Masing-masing hanya bisa melihat datanya sendiri.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select id="massalKategori" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg outline-none bg-white font-semibold">
@@ -1857,7 +1887,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Peran (Hak Akses)</label>
           <select id="pgRole" onchange="onPgRoleChange()" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-emerald-600 font-bold">
-            <option value="PIMPINAN">PIMPINAN — Rekap Pekanan & Kalender (data sendiri)</option>
+            <option value="PIMPINAN">PIMPINAN — Rekap & Kalender (data sendiri)</option>
             <option value="GURU">GURU / ANGGOTA — Kalender Bulanan (data sendiri)</option>
             <option value="ADMIN">ADMIN — Akses penuh + kelola pengguna</option>
           </select>
@@ -2066,7 +2096,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
       peserta: ['fa-users', 'Data Peserta'],
       kesanggupan: ['fa-calendar-check', 'Jadwal & Kesanggupan'],
       koreksi: ['fa-table-cells', 'Koreksi Absen (Matriks)'],
-      pimpinan: ['fa-user-tie', 'Rekap Pekanan (Pimpinan)'],
+      pimpinan: ['fa-calendar-days', 'Rekap'],
       total: ['fa-chart-pie', 'Total Bulanan'],
       kalender: ['fa-calendar-week', 'Kalender Bulanan'],
       pengguna: ['fa-user-shield', 'Pengguna & Hak Akses']
@@ -2942,23 +2972,241 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
         .simpanEditKoreksi(data);
     }
 
-    // 5. REKAP PEKANAN (9 PIMPINAN: TERMASUK TU I & TU II)
-    function applyPimpinanFilter() {
+    // 5. REKAP PEKANAN (SELURUH / PIMPINAN / ANGGOTA, PER PEKAN)
+    // Memakai data getRekapKalender (sama dengan Kalender Bulanan), lalu dihitung di browser
+    // sehingga ganti pekan / kategori / pencarian terasa instan tanpa memanggil server lagi.
+    let cachePekanan = null;        // hasil getRekapKalender
+    let pekananKey = '';            // "bulan-tahun" yang sedang dimuat
+    let pekananKategori = 'ALL';
+    const RENTANG_PEKAN = { 1: [1, 7], 2: [8, 14], 3: [15, 21], 4: [22, 30] };
+    const SINGKAT_HARI = { 'Ahad': 'Ahd', 'Senin': 'Sen', 'Selasa': 'Sel', 'Rabu': 'Rab', 'Kamis': 'Kam', "Jum'at": 'Jum', 'Sabtu': 'Sab' };
+
+    function applyPimpinanFilter(paksa) {
       const bulan = document.getElementById('filterPimpinanBulan').value;
       const tahun = document.getElementById('filterPimpinanTahun').value;
       syncBulanSelector(bulan);
       syncTahunInput(tahun);
+      const key = bulan + '-' + tahun;
+      if (!paksa && cachePekanan && pekananKey === key) { renderRekapPekanan(); return; }
 
-      document.getElementById('pimpinanTbody').innerHTML = '<tr><td colspan="14" class="py-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Menghitung rekapitulasi 9 Pimpinan dari Log Rekap Absen...</td></tr>';
-
+      document.getElementById('pimpinanTbody').innerHTML = '<tr><td colspan="14" class="py-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Menghitung rekapitulasi dari Log Rekap Absen...</td></tr>';
       run()
         .withSuccessHandler(res => {
-          cachePimpinan = res || { rows: [] };
-          document.getElementById('pimpinanPeriodeText').textContent = res.periodeHijriah;
-          renderRekapPimpinan(cachePimpinan.rows);
+          cachePekanan = res;
+          pekananKey = key;
+          document.getElementById('pimpinanPeriodeText').textContent = res.periodeHijriah + ` (${res.jumlahHari} hari)`;
+          // Pekan ke-4 menyesuaikan jumlah hari bulan (29/30)
+          const opt4 = document.querySelector('#filterPekan option[value="4"]');
+          if (opt4) opt4.textContent = `Pekan 4 (Tgl 22-${res.jumlahHari})`;
+          renderRekapPekanan();
         })
         .withFailureHandler(err => showToast(err.message, 'error'))
-        .getRekapPimpinan(bulan, tahun);
+        .getRekapKalender(bulan, tahun);
+    }
+
+    function setPekananKategori(kat) {
+      pekananKategori = kat;
+      renderRekapPekanan();
+    }
+
+    function toggleMenuCetakPekanan(e) {
+      e.stopPropagation();
+      document.getElementById('menuCetakPekanan').classList.toggle('hidden');
+    }
+    document.addEventListener('click', () => { const m = document.getElementById('menuCetakPekanan'); if (m) m.classList.add('hidden'); });
+
+    function onPekanChange() {
+      const c = document.getElementById('filterPekan').value === 'C';
+      const w = document.getElementById('pekananCustomWrap');
+      w.classList.toggle('hidden', !c); w.classList.toggle('inline-flex', c);
+      renderRekapPekanan();
+    }
+
+    function rentangTanggalPekan(pekan, jumlahHari) {
+      if (!pekan) return [1, jumlahHari];
+      const r = RENTANG_PEKAN[pekan];
+      return [r[0], pekan === 4 ? jumlahHari : Math.min(r[1], jumlahHari)];
+    }
+
+    // Kesanggupan per hari: satu nilai bila sama, atau rentang bila berbeda antar-hari
+    function teksKesanggupan(p) {
+      const nilai = ['sabtu', 'ahad', 'senin', 'selasa', 'rabu', 'kamis']
+        .map(k => p.sanggup[k]).filter(x => x && x.aktif && x.detik > 0).map(x => x.detik);
+      if (!nilai.length) return '-';
+      const mn = Math.min(...nilai), mx = Math.max(...nilai);
+      return mn === mx ? fmtDetik(mn) : `${fmtDetik(mn)} – ${fmtDetik(mx)}`;
+    }
+
+    // Hitung rekap satu orang pada rentang tanggal d1..d2
+    function hitungRekapOrang(p, d1, d2) {
+      let real = 0, target = 0, aktif = 0, masuk = 0;
+      const harian = [];
+      for (let d = d1; d <= d2; d++) {
+        const i = d - 1;
+        const cd = cachePekanan.calendarDays[i];
+        const sec = p.harianDetik[i] || 0;
+        real += sec;
+        if (sec > 0) masuk++;
+        let st;
+        if (cd.isJumat) st = sec > 0 ? 'hadir' : 'libur';
+        else {
+          const sg = p.sanggup[cd.namaHari.toLowerCase()];
+          if (sg && sg.aktif) {
+            aktif++; target += sg.detik;
+            st = sec > 0 ? 'hadir' : (cd.isMendatang ? 'mendatang' : 'absen');
+          } else st = sec > 0 ? 'hadir' : 'izin';
+        }
+        harian.push({ d, sec, st, cd });
+      }
+      const pekanSec = [1, 2, 3, 4].map(k => {
+        const r = rentangTanggalPekan(k, cachePekanan.jumlahHari);
+        let t = 0; for (let d = r[0]; d <= r[1]; d++) t += p.harianDetik[d - 1] || 0; return t;
+      });
+      const pct = target > 0 ? real / target * 100 : 0;
+      let status;
+      if (target > 0 && real >= target) status = `TERCAPAI (${pct.toFixed(1)}%)`;
+      else if (real > 0) status = target > 0 ? `BELUM TERCAPAI (${pct.toFixed(1)}%)` : 'HADIR (TANPA KEWAJIBAN)';
+      else status = target > 0 ? 'BELUM HADIR' : 'TIDAK ADA KEWAJIBAN';
+      return {
+        idPerson: p.idPerson, nama: p.nama, jabatan: p.jabatan, isPimpinan: p.isPimpinan,
+        kesanggupan: teksKesanggupan(p), harian, pekanSec,
+        real, target, aktif, masuk, pct,
+        rata: masuk > 0 ? Math.floor(real / masuk) : 0,
+        tercapai: target > 0 && real >= target,
+        status
+      };
+    }
+
+    function labelKategoriPekanan() {
+      return pekananKategori === 'PIMPINAN' ? 'Pimpinan' : pekananKategori === 'ANGGOTA' ? 'Anggota' : 'Seluruh Peserta';
+    }
+
+    // Data tampilan sesuai filter (dipakai layar, cetak & Excel)
+    function hitungViewPekanan() {
+      const nilaiPekan = document.getElementById('filterPekan').value;
+      const jh = cachePekanan.jumlahHari;
+      let pekan, d1, d2, labelRentang;
+      if (nilaiPekan === 'C') {
+        // Rentang bebas: dibatasi 1..jumlah hari bulan, otomatis dibalik bila terbalik
+        const elA = document.getElementById('pekananDari'), elB = document.getElementById('pekananSampai');
+        elA.max = jh; elB.max = jh;
+        let a = Math.min(Math.max(parseInt(elA.value, 10) || 1, 1), jh);
+        let b = Math.min(Math.max(parseInt(elB.value, 10) || a, 1), jh);
+        if (a > b) [a, b] = [b, a];
+        pekan = 'C'; d1 = a; d2 = b; labelRentang = 'Custom';
+      } else {
+        pekan = parseInt(nilaiPekan, 10) || 0;
+        [d1, d2] = rentangTanggalPekan(pekan, jh);
+        labelRentang = pekan ? 'Pekan ' + pekan : 'Satu Bulan';
+      }
+      const q = (document.getElementById('searchPekananInput').value || '').toLowerCase();
+      const admin = currentUser && currentUser.role === 'ADMIN';
+      const rows = cachePekanan.peserta
+        .filter(p => !admin || pekananKategori === 'ALL' || (pekananKategori === 'PIMPINAN' ? p.isPimpinan : !p.isPimpinan))
+        .filter(p => !q || String(p.nama || '').toLowerCase().includes(q) || String(p.jabatan || '').toLowerCase().includes(q) || String(p.idPerson).includes(q))
+        .map(p => hitungRekapOrang(p, d1, d2));
+      const hariPekan = cachePekanan.calendarDays.slice(d1 - 1, d2);
+      const fmtM = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '';
+      const teksRentang = `Tgl ${d1}–${d2} ${cachePekanan.namaBulan} ${cachePekanan.tahun} H` +
+        (hariPekan.length ? ` (${fmtM(hariPekan[0].masehi)} – ${fmtM(hariPekan[hariPekan.length - 1].masehi)})` : '');
+      return { pekan, d1, d2, rows, hariPekan, teksRentang, admin, labelRentang };
+    }
+
+    function badgeStatus(r) {
+      const warna = r.tercapai ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+        : (r.real > 0 ? 'bg-amber-100 text-amber-800 border border-amber-300'
+        : (r.target > 0 ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-500 border border-slate-200'));
+      return `<span class="px-3 py-1 rounded-full text-[10px] font-black whitespace-nowrap ${warna}">${esc(r.status)}</span>`;
+    }
+
+    function renderRekapPekanan() {
+      if (!cachePekanan) return;
+      const v = hitungViewPekanan();
+      cachePimpinan = { rows: v.rows, periodeHijriah: cachePekanan.periodeHijriah, bulan: cachePekanan.bulan, tahun: cachePekanan.tahun, view: v };
+
+      // Tombol kategori & badge
+      ['ALL', 'PIMPINAN', 'ANGGOTA'].forEach(k => {
+        const b = document.getElementById('pkKat-' + k);
+        if (b) b.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition ' + (k === pekananKategori ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:bg-white');
+      });
+      document.getElementById('pekananKategoriBadge').textContent = v.admin ? `${labelKategoriPekanan()} • ${v.rows.length} orang` : 'Data Pribadi';
+      const info = document.getElementById('pekananInfoPekan');
+      info.classList.toggle('hidden', !v.pekan);
+      info.innerHTML = v.pekan ? `<i class="fa-solid fa-calendar-week text-emerald-600 mr-1"></i> <b>${esc(v.labelRentang)}</b> · ${esc(v.teksRentang)}` : '';
+
+      // Ringkasan
+      const tot = (f) => v.rows.reduce((a, r) => a + r[f], 0);
+      const real = tot('real'), target = tot('target'), pct = target > 0 ? real / target * 100 : 0;
+      const tercapai = v.rows.filter(r => r.tercapai).length;
+      const kartu = (ikon, warna, judul, nilai, sub) => `<div class="kpi ${warna}">
+          <div class="kpi-val font-mono">${nilai}</div><div class="kpi-label">${judul}</div>
+          <div class="kpi-sub truncate pr-16">${sub}</div>
+          <div class="kpi-ico"><span><i class="fa-solid ${ikon}"></i></span></div></div>`;
+      document.getElementById('pekananKpi').innerHTML =
+        kartu('fa-clock', 'kpi-green', 'Total Jam Realita', fmtDetik(real), v.pekan ? `${v.labelRentang} · Tgl ${v.d1}–${v.d2}` : 'Satu bulan') +
+        kartu('fa-bullseye', 'kpi-blue', 'Target Jam (Wajib)', fmtDetik(target), `${v.rows.length} orang`) +
+        kartu('fa-calendar-check', 'kpi-teal', 'Hari Masuk / Aktif', `${tot('masuk')} / ${tot('aktif')}`, 'akumulasi orang-hari') +
+        `<div class="kpi kpi-orange"><div class="kpi-val">${pct.toFixed(1)}%</div><div class="kpi-label">Capaian</div>
+          <div class="kpi-bar"><div style="width:${Math.min(pct, 100)}%"></div></div>
+          <div class="kpi-sub">${tercapai} dari ${v.rows.length} orang tercapai</div>
+          <div class="kpi-ico"><span><i class="fa-solid fa-chart-line"></i></span></div></div>`;
+
+      // Kepala tabel
+      const th = (isi, cls = '') => `<th class="py-2.5 px-3 text-center border-r border-slate-200 ${cls}">${isi}</th>`;
+      let head = '<tr>' +
+        '<th class="py-2.5 px-3 text-center border-r border-slate-200 w-10">No</th>' +
+        '<th class="py-2.5 px-4 border-r border-slate-200 min-w-[180px]">Nama</th>' +
+        '<th class="py-2.5 px-3 border-r border-slate-200 min-w-[130px]">Jabatan</th>' +
+        th('Kesanggupan / Hari');
+      if (!v.pekan) {
+        [1, 2, 3, 4].forEach(k => {
+          const r = rentangTanggalPekan(k, cachePekanan.jumlahHari);
+          head += th(`Pekan ${k}<br><span class="text-[10px] text-slate-400 font-normal normal-case">Tgl ${r[0]} - ${r[1]}</span>`, 'bg-emerald-50/50');
+        });
+      } else {
+        v.hariPekan.forEach(cd => {
+          const msh = cd.masehi ? new Date(cd.masehi + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '';
+          const warna = cd.isHariIni ? 'bg-emerald-600 text-white' : (cd.isJumat ? 'bg-amber-50/80 text-amber-800' : 'bg-emerald-50/50');
+          head += th(`${esc(SINGKAT_HARI[cd.namaHari] || cd.namaHari)}, ${cd.day}<br><span class="text-[10px] font-normal normal-case opacity-70">${esc(msh)}</span>`, `min-w-[78px] ${warna}`);
+        });
+      }
+      head += th('Total Realita Jam', 'font-extrabold bg-slate-100 text-emerald-900') +
+        th('Target Jam (Wajib)') +
+        th('Hari Aktif<br><span class="text-[10px] text-amber-700 font-medium normal-case">Kewajiban</span>', 'bg-amber-50/50') +
+        th('Hari Masuk<br><span class="text-[10px] text-blue-700 font-medium normal-case">Hadir Piket</span>', 'bg-blue-50/50') +
+        th('Rata-rata / Hari') +
+        '<th class="py-2.5 px-4 text-center">Status Capaian</th></tr>';
+      document.getElementById('pekananThead').innerHTML = head;
+
+      const tbody = document.getElementById('pimpinanTbody');
+      const kolom = 10 + (v.pekan ? v.hariPekan.length : 4);
+      if (!v.rows.length) {
+        tbody.innerHTML = `<tr><td colspan="${kolom}" class="py-8 text-center text-slate-400">Tidak ada peserta yang cocok.</td></tr>`;
+        return;
+      }
+      const selHari = (h) => {
+        if (h.st === 'hadir') return `<td class="py-2.5 px-2 text-center font-mono font-bold text-emerald-800 bg-emerald-50/40">${fmtDetik(h.sec)}</td>`;
+        if (h.st === 'libur') return '<td class="py-2.5 px-2 text-center text-[10px] font-bold text-amber-700 bg-amber-50/40">Libur</td>';
+        if (h.st === 'izin') return '<td class="py-2.5 px-2 text-center text-[10px] font-bold text-sky-700 bg-sky-50">Izin</td>';
+        if (h.st === 'absen') return '<td class="py-2.5 px-2 text-center text-[10px] font-bold text-rose-600 bg-rose-50" title="Tidak hadir pada hari kewajiban">Absen</td>';
+        return '<td class="py-2.5 px-2 text-center text-slate-300">·</td>';
+      };
+      tbody.innerHTML = v.rows.map((r, idx) => `
+        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+          <td class="py-2.5 px-3 text-center text-slate-500 font-mono font-semibold">${idx + 1}</td>
+          <td class="py-2.5 px-4 font-extrabold text-slate-800">${esc(r.nama)}${r.isPimpinan && v.admin && pekananKategori === 'ALL' ? ' <span class="ml-1 px-1.5 py-px rounded bg-emerald-100 text-emerald-700 text-[9px] font-black">PIMPINAN</span>' : ''}</td>
+          <td class="py-2.5 px-3 text-slate-600 font-bold">${esc(r.jabatan)}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-medium text-slate-600">${esc(r.kesanggupan)}</td>
+          ${!v.pekan
+            ? r.pekanSec.map(sec => `<td class="py-2.5 px-3 text-center font-mono ${sec > 0 ? 'font-bold text-emerald-800 bg-emerald-50/40' : 'text-slate-400'}">${sec > 0 ? fmtDetik(sec) : '-'}</td>`).join('')
+            : r.harian.map(selHari).join('')}
+          <td class="py-2.5 px-3 text-center font-mono font-black text-emerald-900 bg-slate-100">${r.real > 0 ? fmtDetik(r.real) : '-'}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700">${fmtDetik(r.target)}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-amber-700 bg-amber-50/50">${r.aktif} Hari</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-blue-700 bg-blue-50/50">${r.masuk} Hari</td>
+          <td class="py-2.5 px-3 text-center font-mono font-semibold text-slate-700">${r.rata > 0 ? fmtDetik(r.rata) : '-'}</td>
+          <td class="py-2.5 px-4 text-center">${badgeStatus(r)}${progressBar(r.status)}</td>
+        </tr>`).join('');
     }
 
     // Bar progres kecil dari angka persen di teks status, mis. "BELUM TERCAPAI (62.5%)"
@@ -2968,42 +3216,6 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
       const pct = Math.min(parseFloat(m[1]), 100);
       const warna = pct >= 100 ? 'bg-emerald-500' : (pct >= 70 ? 'bg-amber-400' : 'bg-rose-400');
       return `<div class="mt-1.5 h-1.5 w-full min-w-[90px] bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${warna} rounded-full" style="width:${pct}%"></div></div>`;
-    }
-
-    function renderRekapPimpinan(list) {
-      const tbody = document.getElementById('pimpinanTbody');
-      if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="14" class="py-8 text-center text-slate-400">Tidak ada data pimpinan terdaftar.</td></tr>';
-        return;
-      }
-      let html = '';
-      list.forEach((p, idx) => {
-        const isTercapai = p.status.includes('TERCAPAI') && !p.status.includes('BELUM');
-        html += `
-          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-            <td class="py-2.5 px-3 text-center text-slate-500 font-mono font-semibold">${idx + 1}</td>
-            <td class="py-2.5 px-4 font-extrabold text-slate-800">${esc(p.nama)}</td>
-            <td class="py-2.5 px-3 text-slate-600 font-bold">${esc(p.jabatan)}</td>
-            <td class="py-2.5 px-3 text-center font-mono font-medium text-slate-600">${formatTimeDisplay(p.kesanggupan)}</td>
-            <td class="py-2.5 px-3 text-center font-mono ${p.pekan1 !== '-' ? 'font-bold text-emerald-800 bg-emerald-50/40' : 'text-slate-400'}">${formatTimeDisplay(p.pekan1)}</td>
-            <td class="py-2.5 px-3 text-center font-mono ${p.pekan2 !== '-' ? 'font-bold text-emerald-800 bg-emerald-50/40' : 'text-slate-400'}">${formatTimeDisplay(p.pekan2)}</td>
-            <td class="py-2.5 px-3 text-center font-mono ${p.pekan3 !== '-' ? 'font-bold text-emerald-800 bg-emerald-50/40' : 'text-slate-400'}">${formatTimeDisplay(p.pekan3)}</td>
-            <td class="py-2.5 px-3 text-center font-mono ${p.pekan4 !== '-' ? 'font-bold text-emerald-800 bg-emerald-50/40' : 'text-slate-400'}">${formatTimeDisplay(p.pekan4)}</td>
-            <td class="py-2.5 px-3 text-center font-mono font-black text-emerald-900 bg-slate-100">${formatTimeDisplay(p.totalJam)}</td>
-            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700">${formatTimeDisplay(p.targetJam)}</td>
-            <td class="py-2.5 px-3 text-center font-extrabold text-amber-700 bg-amber-50/50" title="Hari yang disanggupi (bukan Jum'at & bukan hari izin)">${p.hariAktif} Hari</td>
-            <td class="py-2.5 px-3 text-center font-extrabold text-blue-700 bg-blue-50/50" title="Total hari hadir piket di Log Absen">${p.hariMasuk} Hari</td>
-            <td class="py-2.5 px-3 text-center font-mono font-semibold text-slate-700">${formatTimeDisplay(p.rataRata)}</td>
-            <td class="py-2.5 px-4 text-center">
-              <span class="px-3 py-1 rounded-full text-[10px] font-black whitespace-nowrap ${
-                isTercapai ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
-              }">${esc(p.status)}</span>
-              ${progressBar(p.status)}
-            </td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
     }
 
     // 6. TOTAL BULANAN
@@ -3319,7 +3531,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
 
     function kopSurat() {
       return `<div class="kop"><div class="logo">L</div><div>
-        <h1>LABORATORIUM LABSOMA</h1>
+        <h1>LABSOMA</h1>
         <p>Pondok Pesantren Sidogiri • Pasuruan, Jawa Timur</p></div></div>`;
     }
 
@@ -3334,10 +3546,10 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
     }
 
     // Buka jendela cetak; bila popup diblokir, pakai iframe tersembunyi
-    function cetakHTML(judul, isi) {
+    function cetakHTML(judul, isi, cssTambahan) {
       const html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${esc(judul)}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-        <style>${CSS_CETAK}</style></head><body>${isi}
+        <style>${CSS_CETAK}${cssTambahan || ''}</style></head><body>${isi}
         <div class="foot">Dicetak dari Sistem Absensi Labsoma • ${esc(infoHariIni ? infoHariIni.teksLengkap : '')} • ${new Date().toLocaleString('id-ID')}</div>
         </body></html>`;
       let w = null;
@@ -3357,46 +3569,68 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
     // =====================================================================
     // CETAK & EXCEL REKAP PEKANAN PIMPINAN
     // =====================================================================
-    function cetakRekapPimpinan() {
-      const rows = (cachePimpinan && cachePimpinan.rows) || [];
-      if (rows.length === 0) { showToast('Tidak ada data untuk dicetak. Klik Filter dulu.', 'error'); return; }
-      let body = '';
-      rows.forEach((p, i) => {
-        const ok = p.status.includes('TERCAPAI') && !p.status.includes('BELUM');
-        body += `<tr>
-          <td class="c">${i + 1}</td><td><b>${esc(p.nama)}</b></td><td>${esc(p.jabatan)}</td>
-          <td class="c mono">${esc(formatTimeDisplay(p.kesanggupan))}</td>
-          <td class="c mono">${esc(formatTimeDisplay(p.pekan1))}</td><td class="c mono">${esc(formatTimeDisplay(p.pekan2))}</td>
-          <td class="c mono">${esc(formatTimeDisplay(p.pekan3))}</td><td class="c mono">${esc(formatTimeDisplay(p.pekan4))}</td>
-          <td class="c mono"><b>${esc(formatTimeDisplay(p.totalJam))}</b></td><td class="c mono">${esc(formatTimeDisplay(p.targetJam))}</td>
-          <td class="c">${p.hariAktif}</td><td class="c">${p.hariMasuk}</td>
-          <td class="c mono">${esc(formatTimeDisplay(p.rataRata))}</td>
-          <td class="c ${ok ? 'ok' : 'no'}">${esc(p.status)}</td></tr>`;
-      });
+    // mode: 'lengkap' = seluruh kolom seperti di layar, 'ringkas' = No|Nama|Jabatan|Hari Aktif|Hari Masuk|Status
+    function cetakRekapPekanan(mode) {
+      document.getElementById('menuCetakPekanan').classList.add('hidden');
+      if (!cachePekanan) { showToast('Data belum dimuat.', 'error'); return; }
+      const v = hitungViewPekanan();
+      if (!v.rows.length) { showToast('Tidak ada data untuk dicetak.', 'error'); return; }
+      const judulPekan = v.pekan ? `${v.labelRentang} · ${v.teksRentang}` : `Satu Bulan Penuh · ${cachePekanan.periodeHijriah}`;
+      const kategori = v.admin ? labelKategoriPekanan() : `${v.rows[0].nama}`;
+      const kelasSt = (r) => r.tercapai ? 'ok' : 'no';
+      let thead, body, extraCss = '';
+
+      if (mode === 'ringkas') {
+        extraCss = '@page { size: A4 portrait; margin: 14mm; } body { font-size: 11px; } td, th { padding: 6px 8px; }';
+        thead = '<tr><th class="c" style="width:34px">No</th><th>Nama</th><th>Jabatan</th><th class="c">Hari Aktif</th><th class="c">Hari Masuk</th><th class="c">Status</th></tr>';
+        body = v.rows.map((r, i) => `<tr><td class="c">${i + 1}</td><td><b>${esc(r.nama)}</b></td><td>${esc(r.jabatan)}</td>
+          <td class="c">${r.aktif}</td><td class="c">${r.masuk}</td><td class="c ${kelasSt(r)}">${esc(r.status)}</td></tr>`).join('');
+      } else {
+        const kolomTengah = !v.pekan
+          ? [1, 2, 3, 4].map(k => { const rg = rentangTanggalPekan(k, cachePekanan.jumlahHari); return `<th class="c">Pekan ${k}<br><small>Tgl ${rg[0]}-${rg[1]}</small></th>`; }).join('')
+          : v.hariPekan.map(cd => `<th class="c">${esc(SINGKAT_HARI[cd.namaHari] || cd.namaHari)}, ${cd.day}<br><small>${cd.masehi ? esc(new Date(cd.masehi + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })) : ''}</small></th>`).join('');
+        thead = `<tr><th class="c">No</th><th>Nama</th><th>Jabatan</th><th class="c">Kesanggupan/Hari</th>${kolomTengah}
+          <th class="c">Total Realita</th><th class="c">Target (Wajib)</th><th class="c">Hari Aktif</th><th class="c">Hari Masuk</th>
+          <th class="c">Rata-rata/Hari</th><th class="c">Status Capaian</th></tr>`;
+        const selCetak = (h) => h.st === 'hadir' ? `<td class="c mono">${fmtDetik(h.sec)}</td>`
+          : `<td class="c" style="font-size:9px;color:${h.st === 'absen' ? '#be123c' : '#64748b'}">${h.st === 'libur' ? 'Libur' : h.st === 'izin' ? 'Izin' : h.st === 'absen' ? 'Absen' : '-'}</td>`;
+        body = v.rows.map((r, i) => `<tr>
+          <td class="c">${i + 1}</td><td><b>${esc(r.nama)}</b></td><td>${esc(r.jabatan)}</td>
+          <td class="c mono">${esc(r.kesanggupan)}</td>
+          ${!v.pekan ? r.pekanSec.map(sec => `<td class="c mono">${sec > 0 ? fmtDetik(sec) : '-'}</td>`).join('') : r.harian.map(selCetak).join('')}
+          <td class="c mono"><b>${r.real > 0 ? fmtDetik(r.real) : '-'}</b></td><td class="c mono">${fmtDetik(r.target)}</td>
+          <td class="c">${r.aktif}</td><td class="c">${r.masuk}</td>
+          <td class="c mono">${r.rata > 0 ? fmtDetik(r.rata) : '-'}</td>
+          <td class="c ${kelasSt(r)}">${esc(r.status)}</td></tr>`).join('');
+      }
+
       const isi = `${kopSurat()}
-        <h2>Rekapitulasi Presensi Pekanan Pimpinan Labsoma</h2>
-        <div class="sub">${esc(cachePimpinan.periodeHijriah || '')}</div>
-        <table><thead><tr>
-          <th class="c">No</th><th>Nama Pimpinan</th><th>Jabatan</th><th class="c">Kesanggupan/Hari</th>
-          <th class="c">Pekan 1<br><small>Tgl 1-7</small></th><th class="c">Pekan 2<br><small>Tgl 8-14</small></th>
-          <th class="c">Pekan 3<br><small>Tgl 15-21</small></th><th class="c">Pekan 4<br><small>Tgl 22-30</small></th>
-          <th class="c">Total Realita</th><th class="c">Target</th><th class="c">Hari Aktif</th><th class="c">Hari Masuk</th>
-          <th class="c">Rata-rata/Hari</th><th class="c">Status</th></tr></thead><tbody>${body}</tbody></table>
-        ${blokTtd(rows)}`;
-      cetakHTML('Rekap Pekanan Pimpinan - ' + (cachePimpinan.periodeHijriah || ''), isi);
+        <h2>Rekapitulasi Presensi Labsoma</h2>
+        <div class="sub">${esc(judulPekan)}<br>Kategori: <b>${esc(kategori)}</b> · ${v.rows.length} orang</div>
+        <table><thead>${thead}</thead><tbody>${body}</tbody></table>
+        ${blokTtd(cachePekanan.peserta)}`;
+      cetakHTML(`Rekap ${mode === 'ringkas' ? '(Ringkas) ' : ''}- ${cachePekanan.periodeHijriah}`, isi, extraCss);
     }
 
     function unduhExcelPimpinan() {
-      const rows = (cachePimpinan && cachePimpinan.rows) || [];
-      if (rows.length === 0) { showToast('Tidak ada data. Klik Filter dulu.', 'error'); return; }
-      const aoa = [['Rekap Pekanan Pimpinan Labsoma - ' + (cachePimpinan.periodeHijriah || '')], [],
-        ['No', 'ID Person', 'Nama', 'Jabatan', 'Kesanggupan/Hari', 'Pekan 1', 'Pekan 2', 'Pekan 3', 'Pekan 4', 'Total Realita', 'Target', 'Hari Aktif', 'Hari Masuk', 'Rata-rata/Hari', 'Status']];
-      rows.forEach((p, i) => aoa.push([i + 1, p.idPerson, p.nama, p.jabatan, p.kesanggupan, p.pekan1, p.pekan2, p.pekan3, p.pekan4, p.totalJam, p.targetJam, p.hariAktif, p.hariMasuk, p.rataRata, p.status]));
+      if (!cachePekanan) { showToast('Data belum dimuat.', 'error'); return; }
+      const v = hitungViewPekanan();
+      if (!v.rows.length) { showToast('Tidak ada data.', 'error'); return; }
+      const tengah = !v.pekan ? ['Pekan 1', 'Pekan 2', 'Pekan 3', 'Pekan 4']
+        : v.hariPekan.map(cd => `${cd.namaHari}, ${cd.day} (${cd.masehi || ''})`);
+      const aoa = [[`Rekap Presensi Labsoma - ${v.pekan ? v.labelRentang + ' · ' + v.teksRentang : cachePekanan.periodeHijriah} - ${v.admin ? labelKategoriPekanan() : 'Data Pribadi'}`], [],
+        ['No', 'ID Person', 'Nama', 'Jabatan', 'Kesanggupan/Hari'].concat(tengah, ['Total Realita', 'Target (Wajib)', 'Hari Aktif', 'Hari Masuk', 'Rata-rata/Hari', 'Status Capaian'])];
+      v.rows.forEach((r, i) => {
+        const mid = !v.pekan ? r.pekanSec.map(sec => sec > 0 ? fmtDetik(sec) : '-')
+          : r.harian.map(h => h.st === 'hadir' ? fmtDetik(h.sec) : (h.st === 'libur' ? 'Libur' : h.st === 'izin' ? 'Izin' : h.st === 'absen' ? 'Absen' : '-'));
+        aoa.push([i + 1, r.idPerson, r.nama, r.jabatan, r.kesanggupan].concat(mid,
+          [r.real > 0 ? fmtDetik(r.real) : '-', fmtDetik(r.target), r.aktif, r.masuk, r.rata > 0 ? fmtDetik(r.rata) : '-', r.status]));
+      });
       const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols'] = [{ wch: 4 }, { wch: 12 }, { wch: 28 }, { wch: 16 }].concat(Array(11).fill({ wch: 13 }));
+      ws['!cols'] = [{ wch: 4 }, { wch: 12 }, { wch: 28 }, { wch: 18 }, { wch: 16 }].concat(Array(tengah.length + 6).fill({ wch: 14 }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Rekap Pimpinan');
-      XLSX.writeFile(wb, `Rekap_Pimpinan_${cachePimpinan.bulan}_${cachePimpinan.tahun}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, 'Rekap');
+      XLSX.writeFile(wb, `Rekap_${cachePekanan.bulan}_${cachePekanan.tahun}${v.pekan === 'C' ? '_Tgl' + v.d1 + '-' + v.d2 : (v.pekan ? '_Pekan' + v.pekan : '')}.xlsx`);
     }
 
     // =====================================================================
@@ -3489,6 +3723,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
         total: sum('totalDetik'),
         hariMasuk: sum('hariMasuk'),
         hariAktif: sum('hariAktif'),
+        hariAktifBerjalan: sum('hariAktifBerjalan'),
         target: sum('jamWajibDetik'),
         targetBerjalan: sum('jamWajibBerjalanDetik'),
         maxSec: Math.max(1, ...hari.map(h => h.sec))
@@ -3509,18 +3744,44 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
           <div class="kpi-sub truncate pr-16">${sub}</div>
           <div class="kpi-ico"><span><i class="fa-solid ${ikon}"></i></span></div>
         </div>`;
+      // Tanggal terakhir yang sudah berjalan (hari ini, atau akhir bulan bila bulan sudah lewat)
+      const idxHariIni = v.hari.findIndex(h => h.cd.isHariIni);
+      const tglBerjalan = idxHariIni >= 0 ? idxHariIni + 1 : (v.hari.length && !v.hari[0].cd.isMendatang ? v.hari.length : 0);
+      // Kesanggupan per hari: 1 orang = jam kesanggupannya; banyak orang = total kesanggupan seluruhnya dalam 1 hari
+      const jamSanggupOrang = (p) => {
+        const n = ['sabtu', 'ahad', 'senin', 'selasa', 'rabu', 'kamis'].map(k => p.sanggup[k]).filter(x => x && x.aktif && x.detik > 0).map(x => x.detik);
+        if (!n.length) return 0;
+        const hit = {}; n.forEach(x => hit[x] = (hit[x] || 0) + 1);       // nilai paling sering dipakai
+        return +Object.keys(hit).sort((a, b) => hit[b] - hit[a] || b - a)[0];
+      };
+      const teksSanggup = v.single
+        ? `Kesanggupan: <b>${esc(teksKesanggupan(v.single))}</b> / hari`
+        : `Total kesanggupan: <b>${fmtDetik(v.list.reduce((a, p) => a + jamSanggupOrang(p), 0))}</b> / hari (${v.list.length} orang)`;
+      const kartu2 = (ikon, warna, judul, nilai, subHtml) => `
+        <div class="kpi ${warna}">
+          <div class="kpi-val font-mono">${nilai}</div>
+          <div class="kpi-label">${judul}</div>
+          ${subHtml}
+          <div class="kpi-ico"><span><i class="fa-solid ${ikon}"></i></span></div>
+        </div>`;
+      // Urutan kartu: Total Jam Realita | Target Jam Bulan Ini | Hari Masuk / Aktif | Capaian Hari Aktif
       document.getElementById('kalenderKpi').innerHTML =
-        kartu('fa-clock', 'kpi-green', 'Total Jam Realita', fmtDetik(v.total),
-          v.single ? esc(v.single.nama) : `${v.list.length} orang`) +
-        kartu('fa-calendar-check', 'kpi-teal', v.single ? 'Hari Masuk / Aktif' : 'Orang-hari Masuk / Aktif',
-          `${v.hariMasuk} / ${v.hariAktif}`, v.single ? 'hari hadir dari hari kewajiban' : 'akumulasi semua orang') +
-        kartu('fa-bullseye', 'kpi-blue', 'Target Jam Bulan Ini', fmtDetik(v.target),
-          `s/d hari ini: ${fmtDetik(v.targetBerjalan)}`) +
+        kartu2('fa-clock', 'kpi-green', 'Total Jam Realita', fmtDetik(v.total),
+          `<div class="kpi-sub truncate pr-16">${v.single ? esc(v.single.nama) : `${v.list.length} orang`}</div>`) +
+        kartu2('fa-bullseye', 'kpi-blue', 'Target Jam Bulan Ini', fmtDetik(v.target),
+          `<div class="kpi-sub">${teksSanggup}</div>
+           <div class="kpi-sub">s/d hari ini: <b>${fmtDetik(v.targetBerjalan)}</b></div>`) +
+        // Hari aktif = hari kewajiban yang SUDAH berjalan (s/d hari ini); total sebulan ditampilkan di bawahnya
+        kartu2('fa-calendar-check', 'kpi-teal', v.single ? 'Hari Masuk / Aktif' : 'Orang-hari Masuk / Aktif',
+          `${v.hariMasuk} / ${v.hariAktifBerjalan}`,
+          `<div class="kpi-sub">${tglBerjalan ? `Hari aktif s/d tgl ${tglBerjalan}` : 'Bulan ini belum berjalan'}${v.single ? '' : ' (akumulasi orang-hari)'}</div>
+           <div class="kpi-sub">Hari aktif sebulan: <b>${v.hariAktif} hari</b></div>`) +
+        // Capaian jam pada hari aktif yang sudah berjalan: realita tgl 1..hari ini dibanding target s/d hari ini
         `<div class="kpi kpi-orange">
-          <div class="kpi-val">${pct.toFixed(1)}%</div>
-          <div class="kpi-label">Capaian Bulan Ini</div>
-          <div class="kpi-bar"><div style="width:${Math.min(pct, 100)}%"></div></div>
-          <div class="kpi-sub">Berjalan (s/d hari ini): <b>${pctB.toFixed(1)}%</b></div>
+          <div class="kpi-val">${tglBerjalan ? pctB.toFixed(1) + '%' : '-'}</div>
+          <div class="kpi-label">Capaian Hari Aktif</div>
+          <div class="kpi-bar"><div style="width:${Math.min(pctB, 100)}%"></div></div>
+          <div class="kpi-sub">${tglBerjalan ? `Tgl 1–${tglBerjalan}: <b>${fmtDetik(v.total)}</b> dari ${fmtDetik(v.targetBerjalan)}` : 'Bulan ini belum berjalan'}</div>
           <div class="kpi-ico"><span><i class="fa-solid fa-chart-line"></i></span></div>
         </div>`;
 
@@ -3696,9 +3957,9 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
         <div class="sub">${esc(cacheKalender.periodeHijriah)} • ${esc(judulOrang)}</div>
         <div class="ringkas">
           <div>Total Jam Realita<b>${fmtDetik(v.total)}</b></div>
-          <div>${v.single ? 'Hari Masuk / Aktif' : 'Orang-hari Masuk / Aktif'}<b>${v.hariMasuk} / ${v.hariAktif}</b></div>
+          <div>${v.single ? 'Hari Masuk / Aktif (berjalan)' : 'Orang-hari Masuk / Aktif (berjalan)'}<b>${v.hariMasuk} / ${v.hariAktifBerjalan}</b><small>Hari aktif sebulan: ${v.hariAktif}</small></div>
           <div>Target Jam<b>${fmtDetik(v.target)}</b></div>
-          <div>Capaian<b>${pct}%</b></div>
+          <div>Capaian Hari Aktif<b>${v.targetBerjalan > 0 ? (v.total / v.targetBerjalan * 100).toFixed(1) : '0.0'}%</b></div>
         </div>
         <table class="kal"><thead><tr>${['Sabtu', 'Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at"].map(d => `<th class="c">${d}</th>`).join('')}</tr></thead>
         <tbody>${rows}</tbody></table>
@@ -3852,6 +4113,11 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
       document.getElementById('kalenderMyInfo').classList.toggle('hidden', admin);
       document.getElementById('kalenderMyInfoText').textContent = `Menampilkan data pribadi: ${u.nama} — ${u.jabatan || ''}`;
       if (!admin) { kalPeserta = u.idPerson; kalKategori = 'ALL'; }
+      document.getElementById('pekananFilterAdmin').classList.toggle('hidden', !admin);
+      document.getElementById('pekananMyInfo').classList.toggle('hidden', admin);
+      document.getElementById('pekananMyInfoText').textContent = `Menampilkan data pribadi: ${u.nama} — ${u.jabatan || ''}`;
+      if (!admin) pekananKategori = 'ALL';
+      cachePekanan = null; pekananKey = '';   // ganti akun -> muat ulang data
       // Tombol Excel Rekap Pekanan tetap boleh (hanya berisi data dirinya)
     }
 
@@ -4163,6 +4429,7 @@ html[data-tema="gelap"] [class~="ring-offset-1"] { --tw-ring-offset-color:var(--
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           document.body.classList.remove('sb-open');
+          const mc = document.getElementById('menuCetakPekanan'); if (mc) mc.classList.add('hidden');
           ['modalAturKesanggupan', 'modalImportExcel', 'modalPeserta', 'modalLog', 'modalKoreksiCell', 'modalGantiPassword', 'modalPengguna', 'modalAkunMassal'].forEach(closeModal);
           const kiosk = document.getElementById('tabContent-kiosk');
           if (!kiosk.classList.contains('hidden')) document.getElementById('inputTapId').focus();
